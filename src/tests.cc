@@ -91,7 +91,7 @@
 
     // You might need the following function to print the entire map.
     // Attention if you use it while multiple threads are operating
-    map.apply(printer);
+    // map.apply(printer);
 
 	}
 

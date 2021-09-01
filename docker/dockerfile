@@ -8,7 +8,7 @@ RUN apt-get upgrade -y
 
 # Install additional software needed for development
 RUN apt-get install -y tzdata
-RUN apt-get install -y git man curl build-essential screen gdb libssl-dev psmisc python3
+RUN apt-get install -y git man curl build-essential screen gdb libssl-dev psmisc python3 gcc-multilib g++-multilib
 
 # Change the working directory:
 WORKDIR "/root"

@@ -9,7 +9,11 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include <unordered_map>
+#include <stdlib.h>
+#include <chrono>
 
+#include "simplemap.h"
 #include "config_t.h"
 #include "tests.h"
 
@@ -40,8 +44,14 @@ void parseargs(int argc, char** argv, config_t& cfg) {
     }
 }
 
-// The main routine simply parses the arguments, dumps the arguments, populates the
+// The main routine simply parses the arguments, dumps the arguments, populates the map
 int main(int argc, char** argv) {
+    // create simplemap_t object and initialize the vectors by calling constructor
+    simplemap_t<int, float> vectors;
+
+    std::unordered_map<int, float> map;
+    simplemap_t<int, float>::initialize_map(map);
+
     // get the configuration, print it
     config_t config;
     parseargs(argc, argv, config);

@@ -10,10 +10,10 @@
 
 # This defaults bits to 32, but allows it to be overridden on the command
 # line
-BITS = 32
+BITS = 64
 
 # Output directory
-ODIR  = obj32
+ODIR  = obj64
 tmp  := $(shell mkdir -p $(ODIR))
 
 # Basic compiler configuration and flags
@@ -22,7 +22,7 @@ CXXFLAGS = -MMD -ggdb -O3 -std=gnu++11 -m$(BITS)
 LDFLAGS	 = -m$(BITS) -lpthread -lrt
 
 # The basenames of the c++ files that this program uses
-CXXFILES = p1 tests config_t
+CXXFILES = p1 simplemap tests config_t 
 
 # The executable we will build
 TARGET = $(ODIR)/p1
@@ -57,3 +57,4 @@ $(TARGET): $(OFILES)
 
 # Pull in all dependencies
 -include $(DFILES)
+
