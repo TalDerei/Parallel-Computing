@@ -18,13 +18,14 @@
 #include <vector>
 #include <cassert>
 #include <unordered_map>
+#include <algorithm>
 
 template <class K, class V>
 class simplemap_t {
-
+    
     // The map of key/value pairs
-    static std::unordered_map<K,V> map;
-
+    std::unordered_map<K,V> map;
+    
     // Define the two vectors of types K and V
 	// << use std::vector<K> >>
     std::vector<K> keys;
@@ -38,31 +39,31 @@ class simplemap_t {
     }
     
     // initialize unordered map
-    static void initialize_map(std::unordered_map<K, V> &);
+    void initialize_map(std::unordered_map<K, V> &);
 
     // Insert (key, val) if and only if the key is not currently present in
     // the map.  Returns true on success, false if the key was
     // already present.
-    static void insert(K, V);
+    void insert(K, V);
 
     // If key is present in the data structure, replace its value with val
     // and return true; if key is not present in the data structure, return
     // false.
-    static bool update(K, V);
+    bool update(K, V);
 
     // Remove the (key, val) pair if it is present in the data structure.
     // Returns true on success, false if the key was not already present.
-    static bool remove(K);
+    bool remove(K);
 
     // If key is present in the map, return a pair consisting of
     // the corresponding value and true. Otherwise, return a pair with the
     // boolean entry set to false.
     // Be careful not to share the memory of the map with application threads, you might
     // get unexpected race conditions
-    static std::pair<V, bool> lookup(K);
+    std::pair<V, bool> lookup(K);
 
     // Apply a function to each key in the map
-    static void apply(void (*f)(K, V));
+    void apply(void (*f)(K, V));
 };
 
 #endif

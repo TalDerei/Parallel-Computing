@@ -41,7 +41,7 @@
 		// Step 4
 		// Define a function "balance" that sums the amount of all the
 		// bank accounts in the map. In order to have a consistent result,
-		// the execution of this function should happen atomically:
+		// the execution of this function should happen atomically (coarse grain lock?):
 		// no other deposit operations should interleave.
 
 		// Step 5

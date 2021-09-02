@@ -44,18 +44,15 @@ void parseargs(int argc, char** argv, config_t& cfg) {
     }
 }
 
-// The main routine simply parses the arguments, dumps the arguments, populates the map
+// Main routine simply parses the arguments, dumps the arguments, populates the map
 int main(int argc, char** argv) {
-    // create simplemap_t object and initialize the vectors by calling constructor
-    simplemap_t<int, float> vectors;
-
-    std::unordered_map<int, float> map;
-    simplemap_t<int, float>::initialize_map(map);
-
-    // get the configuration, print it
+    // Configuration parameters
     config_t config;
     parseargs(argc, argv, config);
     config.dump();
+
+    // Instantiate simplemap_t object and call constructor 
+    simplemap_t<int, float> simple_map;
 
     // crash if the iterations are negative
     assert(config.iters > 0);

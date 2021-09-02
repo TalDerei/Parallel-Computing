@@ -13,57 +13,60 @@
 
 #include "simplemap.h"
 
-template<class K, class V> 
-void simplemap_t<K, V>::initialize_map(std::unordered_map<K, V> &map) {
-    map.insert(std::pair<K,V>(1,2.2));
-    std::cout << "1 => " << map.find(1)->second << '\n';
-}
+// template<class K, class V> 
+// void simplemap_t<K, V>::initialize_map(std::unordered_map<K, V> &map) {
+//     map.insert(std::pair<K,V>(1,2.2));
+//     std::cout << "1 => " << map.find(1)->second << '\n';
+// }
 
 template<class K, class V> 
 void simplemap_t<K, V>::insert(K key, V val) {
-    // std::cout << "key is: " << key;
-    // std::cout << "value is: " << val;
-    // if (!map.insert({key, val}).second) {
-    //     std::cout << "insert failed!";
-    // }
-    // else {
-    //     std::cout << "insert succeedeed!";
-    // }
-    // for (auto i = keys->begin(); i != keys->end(); ++i) {
-    //     if (*i == key) {
-    //         return false;
-    //     }
-    // }
-    // keys->push_back(key);
-    // values->push_back(val);
-    // return true;
+    if(!map.insert({key, val}).second) { 
+        std::cout << "Insert failed!";
+    }
+    else {
+        std::cout << "Insert succeeded!";
+        keys.push_back(key);
+        values.push_back(val);
+    }
 }
 
 template<class K, class V> 
 bool simplemap_t<K, V>::update(K key, V val) {
-    assert("Not Implemented");
+    if(!map.insert({key, val}).second) { 
+        auto update = map.find(key);
+        update->second = val;
+        return false;
+    }
     return false;
 }
 
 template<class K, class V> 
 bool simplemap_t<K, V>::remove(K key) {
-    assert("Not Implemented");
+    if (map.erase(key)) {
+        return true;
+    }
     return false;
 }
 
 template<class K, class V> 
 std::pair<V, bool> simplemap_t<K, V>::lookup(K key) {
-    assert("Not Implemented");
-    return std::make_pair(0, false);
+    std::unordered_map<int,float>::iterator it = map.find(key);
+    if (it == map.end()) {
+        std::cout << "not in map!";
+        return std::make_pair(0, false);
+    }
+    std::cout << "found in map!";
+    return std::make_pair(key, true);
 }
 
 template<class K, class V> 
 void simplemap_t<K, V>::apply(void (*f)(K, V)) {
+    assert("Not Implemented");
     // for (auto i : *keys) {
     //     f(i, values->at(i));
     // }
-    assert("Not Implemented");
 }
 
-// Explicitly instantiate the template, and its member definitions
+// Explicitly instantiate the simplemap_t, and its member definitions
 template class simplemap_t<int,float>;
