@@ -19,6 +19,10 @@
 #include <cassert>
 #include <unordered_map>
 #include <algorithm>
+#include <chrono>
+#include <bits/stdc++.h>
+#include <stdlib.h>
+#include <time.h>
 
 template <class K, class V>
 class simplemap_t {
@@ -39,7 +43,7 @@ class simplemap_t {
     }
     
     // initialize unordered map
-    void initialize_map(std::unordered_map<K, V> &);
+    void initialize_map(K, V);
 
     // Insert (key, val) if and only if the key is not currently present in
     // the map.  Returns true on success, false if the key was
@@ -64,6 +68,8 @@ class simplemap_t {
 
     // Apply a function to each key in the map
     void apply(void (*f)(K, V));
+
+    void init(K, V);
 };
 
 #endif

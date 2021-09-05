@@ -12,10 +12,13 @@
 #include <unordered_map>
 #include <stdlib.h>
 #include <chrono>
+#include<bits/stdc++.h>
 
 #include "simplemap.h"
 #include "config_t.h"
 #include "tests.h"
+
+using namespace std;
 
 // Report on how to use the command line to configure this program
 void usage() {
@@ -33,10 +36,11 @@ void usage() {
 void parseargs(int argc, char** argv, config_t& cfg) {
     // parse the command-line options
     int opt;
-    while ((opt = getopt(argc, argv, "n:k:i:t:h")) != -1) {
+    while ((opt = getopt(argc, argv, "n:k:l:i:t:h")) != -1) {
         switch (opt) {
           case 'n': cfg.name = std::string(optarg); break;
-          case 'k': cfg.key_max = atoi(optarg); break;
+          case 'k': cfg.key_max = atoi(optarg); break;  
+          case 'l': cfg.value_max = atoi(optarg); break;
           case 'i': cfg.iters = atoi(optarg); break;
           case 't': cfg.threads = atoi(optarg); break;
           case 'h': usage(); break;
@@ -46,13 +50,14 @@ void parseargs(int argc, char** argv, config_t& cfg) {
 
 // Main routine simply parses the arguments, dumps the arguments, populates the map
 int main(int argc, char** argv) {
-    // Configuration parameters
+    // CLI configuration parameters
     config_t config;
     parseargs(argc, argv, config);
     config.dump();
 
-    // Instantiate simplemap_t object and call constructor 
-    simplemap_t<int, float> simple_map;
+    /* Instantiate simplemap_t object and call constructor */
+    simplemap_t<int, int> simple_map;
+    simple_map.init(config.key_max, config.value_max);
 
     // crash if the iterations are negative
     assert(config.iters > 0);

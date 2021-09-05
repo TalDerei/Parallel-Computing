@@ -12,16 +12,16 @@
 
 #include "simplemap.h"
 
-	    void printer(int k, float v) {
-			std::cout<<"<"<<k<<","<<v<<">"<< std::endl;
+	void printer(int k, int v) {
+		std::cout<<"<"<<k<<","<<v<<">"<< std::endl;
 	}
 
 	void run_custom_tests(config_t& cfg) {
 		// Step 1
-		// Define a simplemap_t of types <int,float>
+		// Define a simplemap_t of types <int,int>
 		// this map represents a collection of bank accounts:
 		// each account has a unique ID of type int;
-		// each account has an amount of fund of type float.
+		// each account has an amount of fund of type int.
 
 		// Step 2
 		// Populate the entire map with the 'insert' function
