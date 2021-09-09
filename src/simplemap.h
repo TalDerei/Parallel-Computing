@@ -15,6 +15,7 @@
 #define SIMPLEMAP_DEF
 
 #include <iostream>
+#include <string>
 #include <vector>
 #include <cassert>
 #include <unordered_map>
@@ -23,6 +24,7 @@
 #include <bits/stdc++.h>
 #include <stdlib.h>
 #include <time.h>
+#include <functional>
 
 template <class K, class V>
 class simplemap_t {
@@ -41,9 +43,12 @@ class simplemap_t {
         std::vector<K> keys;
         std::vector<V> values;
     }
+
+    // Record exeuction time for unordered map
+    void init(K, int, int);
     
     // initialize unordered map
-    void initialize_map(K, V);
+    void initialize_map(K);
 
     // Insert (key, val) if and only if the key is not currently present in
     // the map.  Returns true on success, false if the key was
@@ -67,9 +72,7 @@ class simplemap_t {
     std::pair<V, bool> lookup(K);
 
     // Apply a function to each key in the map
-    void apply(void (*f)(K, V));
-
-    void init(K, V);
+    void apply(std::function<void(K,V)>&);
 };
 
 #endif

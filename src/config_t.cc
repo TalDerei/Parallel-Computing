@@ -1,6 +1,5 @@
 // CSE 375/475 Assignment #1
 // Fall 2021
-//
 // Description:  This file implements the config_t::dump() function
 
 #include <iostream>

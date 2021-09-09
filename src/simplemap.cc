@@ -12,28 +12,31 @@
 // Students are responsible for implementing the simple map as specified.
 
 #include "simplemap.h"
+#include "tests.h"
 
 using namespace std;
 
+#define BALANCE 100000.0
+
 template<class K, class V> 
-void simplemap_t<K,V>::init(K key, V value) {
+void simplemap_t<K,V>::init(K key, int iterations, int threads) {
     /* Populate map with (key,values) */
-    initialize_map(key, value);
+    initialize_map(key);
 
     /* Map iterator */
-    std::unordered_map<int, int>::iterator it;
+    std::unordered_map<int, float>::iterator it;
 
      /* Start execution time */
     auto start = chrono::high_resolution_clock::now();
 
-    int read_only_ratio = 0;
-    int iterations = 1000000;
-    srand(time(0));
+    
     /* Randomly switch between different set operations */
+    srand(time(0));
+    int read_only_ratio = 0;
     for (int counter = 0; counter < iterations; counter++) {
         long opt = rand() % 100;
         int rand_key = rand() % key; 
-        int rand_value = rand() % value; 
+        float rand_value = BALANCE / (float)((key / 2)); 
         if (opt <= read_only_ratio) {
             lookup(rand_key);
         } 
@@ -63,20 +66,24 @@ void simplemap_t<K,V>::init(K key, V value) {
 }
 
 template<class K, class V> 
-void simplemap_t<K, V>::initialize_map(K key, V val) {
+void simplemap_t<K, V>::initialize_map(K key) {
     int counter = 0;
+    int balance = 0;
     srand(time(0));
     while (counter != key / 2) {
         int key_insert = rand() % key;
-        int val_insert = rand() % val;
-        if (!lookup(key_insert).second) {
+        if (!(lookup(key_insert).second)) {
+            float val_insert = (float) (BALANCE / (key / 2));
             map.insert({key_insert, val_insert});
             counter++;
+            balance += val_insert;
         }
         else {
             continue;
         }
     }
+    cout << endl;
+    cout << "Balance of all accounts is: " << balance << endl;
 }
 
 template<class K, class V> 
@@ -119,7 +126,7 @@ bool simplemap_t<K, V>::remove(K key) {
 
 template<class K, class V> 
 std::pair<V, bool> simplemap_t<K, V>::lookup(K key) {
-    std::unordered_map<int,int>::iterator it = map.find(key);
+    std::unordered_map<int,float>::iterator it = map.find(key);
     if (it == map.end()) {
         // std::cout << "key not in map: " << key << endl;
         return std::make_pair(0, false);
@@ -129,12 +136,11 @@ std::pair<V, bool> simplemap_t<K, V>::lookup(K key) {
 }
 
 template<class K, class V> 
-void simplemap_t<K, V>::apply(void (*f)(K, V)) {
-    assert("Not Implemented");
-    // for (auto i : *keys) {
-    //     f(i, values->at(i));
-    // }
+void simplemap_t<K, V>::apply_balance(std::function<void(K, V)>& func) {
+    for (const auto & [ key, value ] : map) {
+        func(key,value);
+    }
 }
 
 // Explicitly instantiate the simplemap_t, and its member definitions
-template class simplemap_t<int,int>;
+template class simplemap_t<int,float>;

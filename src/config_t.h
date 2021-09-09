@@ -1,7 +1,9 @@
 // CSE 375/475 Assignment #1
 // Fall 2021
-//
 // Description: This file declares a struct for storing per-execution configuration information.
+
+#ifndef CONFIG_DEF
+#define CONFIG_DEF
 
 #include <iostream>
 #include <string>
@@ -13,21 +15,20 @@ struct config_t {
     // The maximum key value
     int key_max;
 
-    // The maximum value 
-    int value_max;
-
     // The number of iterations for which a test should run
     int iters;
 
     // A string that is output with all the other information
-    std::string  name;
+    std::string name;
 
     // The number of threads to use
     int threads;
 
     // simple constructor
-    config_t() : key_max(1000000), value_max(1000000), iters(1024), name("no_name"), threads(1) { }
+    config_t() : key_max(100), iters(1024), name("no_name"), threads(1) { }
 
     // Print the values of the iters, and name fields
     void dump();
 };
+
+#endif
