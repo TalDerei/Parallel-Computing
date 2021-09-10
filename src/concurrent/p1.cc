@@ -66,15 +66,16 @@ int main(int argc, char** argv) {
     // Start execution time 
     auto start = chrono::high_resolution_clock::now();
 
+    do_work(config, simple_map);
     // Spawn threads that execute deposit and balance API calls
-    std::thread worker_one (do_work, config, simple_map);
+    // std::thread worker_one (do_work, config, simple_map);
 
-    cout << "Threads execution concurrently!" <<endl;
+    // cout << "Threads execution concurrently!" <<endl;
 
-    // Synchronize threads by joining them
-    cout << "Waiting for threads to finish!" << endl;
-    worker_one.join();
-    cout << "Done!" << endl;
+    // // Synchronize threads by joining them
+    // cout << "Waiting for threads to finish!" << endl;
+    // worker_one.join();
+    // cout << "Done!" << endl;
 
 
     // Finish execution time 
