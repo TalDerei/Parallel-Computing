@@ -121,8 +121,8 @@ void simplemap_t<K, V>::apply_deposit() {
     V random_val = AMOUNT;
 
     if (random_key_first_acc != random_key_second_acc) {
-        update_subtract(random_key_first_acc, random_val, rand_bucket_one);
-        update_add(random_key_second_acc, random_val, rand_bucket_two);
+        // iterator_one->second -= random_val;
+        // iterator_two->second += random_val;
     } 
     else {
     }
