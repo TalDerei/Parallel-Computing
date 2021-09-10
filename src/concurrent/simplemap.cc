@@ -76,7 +76,7 @@ std::pair<V, bool> simplemap_t<K, V>::lookup(K key) {
 
 template<class K, class V> 
 void simplemap_t<K, V>::update_subtract(K key, V val, K bucket_index) {
-    std::lock_guard<std::mutex> sync(buckets[bucket_index]->lock);
+    std::lock_guard<std::mutex> (buckets[bucket_index]->lock);
     if(!buckets[bucket_index]->map.insert({key, val}).second) { 
         auto update = buckets[bucket_index]->map.find(key);
         update->second = update->second - val;
@@ -85,7 +85,7 @@ void simplemap_t<K, V>::update_subtract(K key, V val, K bucket_index) {
 
 template<class K, class V> 
 void simplemap_t<K, V>::update_add(K key, V val, K bucket_index) {
-    std::lock_guard<std::mutex> sync(buckets[bucket_index]->lock);
+    std::lock_guard<std::mutex> (buckets[bucket_index]->lock);
     if(!buckets[bucket_index]->map.insert({key, val}).second) { 
         auto update = buckets[bucket_index]->map.find(key);
         update->second = update->second + val;
@@ -109,26 +109,43 @@ void simplemap_t<K, V>::apply_balance(std::function<void(K,V)> func) {
 }
 
 template<class K, class V> 
-void simplemap_t<K, V>::apply_deposit(std::function<void(K,K,V,K,K)> func) {
+void simplemap_t<K, V>::apply_deposit(K key_one, K key_two, V amount) {
     for (int index = 0; index < num_buckets; index++) {
         buckets[index]->lock.lock();
     }
-    int rand_bucket_one = rand() % num_buckets;
-    int rand_bucket_two = rand() % num_buckets;
-    auto iterator_one = buckets[rand_bucket_one]->map.begin();
-    auto iterator_two = buckets[rand_bucket_two]->map.begin();
-    std::advance(iterator_one, rand() % buckets[rand_bucket_one]->map.size());
-    std::advance(iterator_two, rand() % buckets[rand_bucket_two]->map.size());
-    K random_key_first_acc = iterator_one->first;
-    K random_key_second_acc = iterator_two->first;
-    V random_val = AMOUNT;
 
-    if (random_key_first_acc != random_key_second_acc) {
-        func(random_key_first_acc, random_key_second_acc, random_val, rand_bucket_one, rand_bucket_two);
-    } 
-    else {
-        apply_deposit(func);
-    }
+    cout << "key_one passed in is: " << key_one << endl;
+        cout << "key_two passed in is: " << key_two << endl;
+
+    size_t bucket_index_one = rand() % num_buckets;
+    cout << "bucket_index_one is: " << bucket_index_one << endl;
+    size_t bucket_index_two = rand() % num_buckets;
+    cout << "bucket_index_two is: " << bucket_index_one << endl;
+    auto result1 = buckets[bucket_index_one]->map.find(key_one);
+    auto result2 = buckets[bucket_index_two]->map.find(key_two);
+        //if any of the account does not exist, return 0
+        if(result1 == buckets[bucket_index_one]->map.end() | result2 == buckets[bucket_index_two]->map.end()){
+            cout << "false!!!!!!!!!!!!!!!!!!!!!" << endl;
+        }
+        else {
+            result1->second -= amount;
+            result2->second += amount;
+        }
+    // int rand_bucket_one = rand() % num_buckets;
+    // int rand_bucket_two = rand() % num_buckets;
+    // auto iterator_one = buckets[rand_bucket_one]->map.begin();
+    // auto iterator_two = buckets[rand_bucket_two]->map.begin();
+    // std::advance(iterator_one, rand() % buckets[rand_bucket_one]->map.size());
+    // std::advance(iterator_two, rand() % buckets[rand_bucket_two]->map.size());
+    // K random_key_second_acc = iterator_two->first;
+    // V random_val = AMOUNT;
+
+    // if (random_key_first_acc != random_key_second_acc) {
+    //     func(random_key_first_acc, random_key_second_acc, random_val, rand_bucket_one, rand_bucket_two);
+    // } 
+    // else {
+    //     apply_deposit(func);
+    // }
 
     for (int index = 0; index < num_buckets; index++) {
         buckets[index]->lock.unlock();

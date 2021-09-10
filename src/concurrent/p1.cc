@@ -77,7 +77,6 @@ int main(int argc, char** argv) {
     // worker_one.join();
     // cout << "Done!" << endl;
 
-
     // Finish execution time 
     auto finish = chrono::high_resolution_clock::now();
 
