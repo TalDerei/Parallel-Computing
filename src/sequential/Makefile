@@ -41,6 +41,7 @@ all: $(TARGET)
 clean:
 	@echo cleaning up...
 	@rm -rf $(ODIR)
+	@rm *.o
 
 # build an .o file from a .cc file
 $(ODIR)/%.o: %.cc

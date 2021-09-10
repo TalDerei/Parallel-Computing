@@ -16,7 +16,6 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
 #include <cassert>
 #include <unordered_map>
 #include <algorithm>
@@ -27,22 +26,13 @@
 #include <functional>
 
 template <class K, class V>
-class simplemap_t {
-    
+class simplemap_t {    
     // The map of key/value pairs
     std::unordered_map<K,V> map;
-    
-    // Define the two vectors of types K and V
-	// << use std::vector<K> >>
-    std::vector<K> keys;
-    std::vector<V> values;
 
   public:
-    // The constructor should just initialize the vectors to be empty
-    simplemap_t() {
-        std::vector<K> keys;
-        std::vector<V> values;
-    }
+    // The constructor initializes an empty simplemap_t object 
+    simplemap_t() {}
 
     // Record exeuction time for unordered map
     void init(K, int, int);
@@ -58,7 +48,9 @@ class simplemap_t {
     // If key is present in the data structure, replace its value with val
     // and return true; if key is not present in the data structure, return
     // false.
-    bool update(K, V);
+    void update_subtract(K, V);
+
+    void update_add(K, V);
 
     // Remove the (key, val) pair if it is present in the data structure.
     // Returns true on success, false if the key was not already present.
@@ -71,8 +63,14 @@ class simplemap_t {
     // get unexpected race conditions
     std::pair<V, bool> lookup(K);
 
-    // Apply a function to each key in the map
-    void apply(std::function<void(K,V)>&);
+    // Apply a balance function to each key in the map
+    void apply_balance(std::function<void(K,V)>);
+
+    // Apply a deposit function to each key in the map
+    void apply_deposit(std::function<void(K,K,V)>);
+
+    // Print unordered map
+    void print();
 };
 
 #endif

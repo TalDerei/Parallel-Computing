@@ -54,13 +54,30 @@ int main(int argc, char** argv) {
     parseargs(argc, argv, config);
     config.dump();
 
-    /* Instantiate simplemap_t object and call constructor */
+    // Instantiate simplemap_t object and call constructor 
     simplemap_t<int, float> simple_map;
-    simple_map.init(config.key_max, config.iters, config.threads);
 
-    // crash if the iterations are negative
+    // Populate unordered map with (key,value) pairs
+    simple_map.initialize_map(config.key_max);
+
+    // Crash if the iterations are negative
     assert(config.iters > 0);
 
-    // launch the tests
+    // Start execution time 
+    auto start = chrono::high_resolution_clock::now();
+
+    // Launch the tests (deposit and balance API calls)
     test_driver(config, simple_map);
+
+    // Finish execution time 
+    auto finish = chrono::high_resolution_clock::now();
+
+    // Duration represents time interval
+    chrono::duration<double> elapse_time = finish - start;
+
+    // Print unordered map
+    // simple_map.print();
+
+    // Print execution time
+    std::cout << "Execution time elapsed is: " << elapse_time.count() << endl;
 }
