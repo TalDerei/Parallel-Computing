@@ -12,8 +12,9 @@
 #include <unordered_map>
 #include <stdlib.h>
 #include <chrono>
+#include <thread>
+#include <mutex>
 #include<bits/stdc++.h>
-
 #include "simplemap.h"
 #include "config_t.h"
 #include "tests.h"
@@ -56,15 +57,25 @@ int main(int argc, char** argv) {
 
     // Instantiate simplemap_t object and call constructor 
     simplemap_t<int, float> simple_map;
-    
+    simple_map.concurrent_hashtable(NUMBUCKETS);
+    simple_map.init(config.key_max);
+
     // Crash if the iterations are negative
     assert(config.iters > 0);
 
     // Start execution time 
     auto start = chrono::high_resolution_clock::now();
 
-    // Launch the tests (deposit and balance API calls)
-    test_driver(config, simple_map);
+    // Spawn threads that execute deposit and balance API calls
+    std::thread worker_one (do_work, config, simple_map);
+
+    cout << "Threads execution concurrently!" <<endl;
+
+    // Synchronize threads by joining them
+    cout << "Waiting for threads to finish!" << endl;
+    worker_one.join();
+    cout << "Done!" << endl;
+
 
     // Finish execution time 
     auto finish = chrono::high_resolution_clock::now();

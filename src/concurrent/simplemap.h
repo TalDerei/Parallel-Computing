@@ -26,20 +26,28 @@
 #include <time.h>
 #include <functional>
 #include <mutex>
+#include <thread>
+
+#define BALANCE 100000.0
+#define AMOUNT 10.0
+#define NUMBUCKETS 5
 
 template <class K, class V>
 class simplemap_t {    
-    // The map of key/value pairs
-    std::unordered_map<K,V> map;
+  // The map of key/value pairs
+  std::unordered_map<K,V> map;
 
-    // Lockable unordered_map of key/value pairs
-    struct bucket_t;
+  // Lockable unordered_map of key/value pairs
+  struct bucket_t;
 
-    // Number of buckets, each bucket representing an account
-    size_t num_buckets;
+  // Number of buckets, each bucket representing an account
+  size_t const num_buckets = NUMBUCKETS;
 
-    // Vector of buckets
-    std::vector<bucket_t *>buckets;
+  // Vector of buckets
+  std::vector<bucket_t *>buckets;
+
+  // Vector of threads
+  std::vector<std::thread> thread_vec;
 
   public:
     // The constructor initializes an empty simplemap_t object 
@@ -53,16 +61,9 @@ class simplemap_t {
     // already present.
     void insert(K, V);
 
-    // If key is present in the data structure, replace its value with val
-    // and return true; if key is not present in the data structure, return
-    // false.
-    void update_subtract(K, V);
-
-    void update_add(K, V);
-
     // Remove the (key, val) pair if it is present in the data structure.
     // Returns true on success, false if the key was not already present.
-    bool remove(K);
+    void remove(K);
 
     // If key is present in the map, return a pair consisting of
     // the corresponding value and true. Otherwise, return a pair with the
@@ -71,14 +72,24 @@ class simplemap_t {
     // get unexpected race conditions
     std::pair<V, bool> lookup(K);
 
+    // If key is present in the data structure, replace its value with val
+    // and return true; if key is not present in the data structure, return
+    // false.
+    void update_subtract(K, V, K);
+
+    void update_add(K, V, K);
+
     // Apply a balance function to each key in the map
     void apply_balance(std::function<void(K,V)>);
 
     // Apply a deposit function to each key in the map
-    void apply_deposit(std::function<void(K,K,V)>);
+    void apply_deposit(std::function<void(K,K,V,K,K)>);
 
     // Print unordered map
     void print();
+
+    // Record exeuction time for unordered map
+    void init(K);
 };
 
 #endif

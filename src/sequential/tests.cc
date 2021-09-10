@@ -19,7 +19,7 @@ void run_custom_tests(config_t& cfg, simplemap_t<int, float> &simple_map) {
 			deposit(simple_map);
 		}
 		else {
-			float acc_balances = balance(simple_map);
+			balance(simple_map);
 		}
 	}
 

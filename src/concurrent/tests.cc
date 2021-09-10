@@ -7,24 +7,26 @@
 
 #include "tests.h"
 
-void test_driver(config_t &cfg, simplemap_t<int, float> &simple_map) {
-	run_custom_tests(cfg, simple_map);
-}
-
-void run_custom_tests(config_t& cfg, simplemap_t<int, float> &simple_map) {
+void do_work(config_t &cfg, simplemap_t<int, float> &simple_map) {
 	srand(time(0));
-	for (int i = 0; i < cfg.iters; i++) {
+	int deposit_counter = 0;
+	int balance_counter = 0;
+	for (int i = 0; i < (cfg.iters / cfg.threads); i++) {
 		int opt = rand() % 100;
 		if (opt < 95) {
 			deposit(simple_map);
+			deposit_counter++;
 		}
 		else {
-			float acc_balances = balance(simple_map);
+			balance(simple_map);
+			balance_counter++;
 		}
 	}
 
 	float acc_balances = balance(simple_map);
 	cout << "Balance of all accounts is: " << acc_balances << endl;
+	cout << "Deposit counter is: " << deposit_counter << endl;
+	cout << "Balance counter is: " << balance_counter << endl;
 }
 
 float balance(simplemap_t<int, float> &simple_map) {
@@ -37,10 +39,10 @@ float balance(simplemap_t<int, float> &simple_map) {
 }
 
 void deposit(simplemap_t<int, float> &simple_map) {
-	auto deposit_lambda = [&](int key_one, int key_two, float v) {
+	auto deposit_lambda = [&](int key_one, int key_two, float v, int bucket_index_one, int bucket_index_two) {
 		if (simple_map.lookup(key_one).second && simple_map.lookup(key_two).second) {
-			simple_map.update_subtract(key_one, v);
-			simple_map.update_add(key_two, v);
+			simple_map.update_subtract(key_one, v, bucket_index_one);
+			simple_map.update_add(key_two, v, bucket_index_two);
 		}
 	};
 	simple_map.apply_deposit(deposit_lambda);
