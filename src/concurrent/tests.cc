@@ -39,18 +39,5 @@ float balance(simplemap_t<int, float> &simple_map) {
 }
 
 void deposit(simplemap_t<int, float> &simple_map) {
-	config_t config;
-	int key_one = rand() % config.key_max;
-	cout << "key_one is: " << key_one << endl;
-	int key_two = rand() % config.key_max;
-	cout << "key_two is: " << key_two << endl;
-	int amount = AMOUNT;
-	simple_map.apply_deposit(key_one, key_two, amount);
-	// auto deposit_lambda = [&](int key_one, int key_two, float v, int bucket_index_one, int bucket_index_two) {
-	// 	if (simple_map.lookup(key_one).second && simple_map.lookup(key_two).second) {
-	// 		simple_map.update_subtract(key_one, v, bucket_index_one);
-	// 		simple_map.update_add(key_two, v, bucket_index_two);
-	// 	}
-	// };
-	// simple_map.apply_deposit(deposit_lambda);
+	simple_map.apply_deposit();
 }

@@ -83,7 +83,7 @@ class simplemap_t {
     void apply_balance(std::function<void(K,V)>);
 
     // Apply a deposit function to each key in the map
-    void apply_deposit(K, K, V);
+    void apply_deposit();
 
     // Print unordered map
     void print();

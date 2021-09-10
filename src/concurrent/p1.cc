@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
     chrono::duration<double> elapse_time = finish - start;
 
     // Print unordered map
-    // simple_map.print();
+    simple_map.print();
 
     // Print execution time
     std::cout << "Execution time elapsed is: " << elapse_time.count() << endl;
