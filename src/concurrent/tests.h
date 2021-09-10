@@ -20,7 +20,7 @@
 using namespace std;
 
 // Execute deposit and balance APIs
-void do_work(config_t &, simplemap_t<int, float> &);
+void do_work(simplemap_t<int, float> &);
 
 // Balance API
 float balance(simplemap_t<int, float> &);

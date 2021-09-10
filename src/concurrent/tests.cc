@@ -7,11 +7,12 @@
 
 #include "tests.h"
 
-void do_work(config_t &cfg, simplemap_t<int, float> &simple_map) {
+void do_work(simplemap_t<int, float> &simple_map) {
+	config_t config;
 	srand(time(0));
 	int deposit_counter = 0;
 	int balance_counter = 0;
-	for (int i = 0; i < (cfg.iters / cfg.threads); i++) {
+	for (int i = 0; i < (config.iters / config.threads); i++) {
 		int opt = rand() % 100;
 		if (opt < 95) {
 			deposit(simple_map);

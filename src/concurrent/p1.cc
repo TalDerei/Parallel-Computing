@@ -14,7 +14,7 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 #include "simplemap.h"
 #include "config_t.h"
 #include "tests.h"
@@ -66,16 +66,8 @@ int main(int argc, char** argv) {
     // Start execution time 
     auto start = chrono::high_resolution_clock::now();
 
-    do_work(config, simple_map);
-    // Spawn threads that execute deposit and balance API calls
-    // std::thread worker_one (do_work, config, simple_map);
-
-    // cout << "Threads execution concurrently!" <<endl;
-
-    // // Synchronize threads by joining them
-    // cout << "Waiting for threads to finish!" << endl;
-    // worker_one.join();
-    // cout << "Done!" << endl;
+    // Spawn threads to execute deposit and balance API calls
+    simple_map.threading(config, simple_map);
 
     // Finish execution time 
     auto finish = chrono::high_resolution_clock::now();
@@ -84,7 +76,7 @@ int main(int argc, char** argv) {
     chrono::duration<double> elapse_time = finish - start;
 
     // Print unordered map
-    simple_map.print();
+    // simple_map.print();
 
     // Print execution time
     std::cout << "Execution time elapsed is: " << elapse_time.count() << endl;

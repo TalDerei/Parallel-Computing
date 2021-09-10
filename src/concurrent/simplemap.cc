@@ -30,6 +30,24 @@ void simplemap_t<K, V>::concurrent_hashtable(size_t _buckets) {
 }
 
 template<class K, class V> 
+void simplemap_t<K, V>::threading(config_t &config, simplemap_t<int, float> &simple_map) {
+    // Vector of threads
+    std::vector<std::thread> threadVec;
+
+    // Spawn thread and insert into vector
+    for (int i = 0; i < config.threads; i++) {
+        threadVec.push_back(std::thread(do_work, ref(simple_map)));
+    }
+
+    // Synchronize threads by joining them
+    for (int i = 0; i < config.threads; i++) {
+        cout << "Waiting for threads to finish!" << endl;
+        threadVec[i].join();
+    }
+    cout << "Done!" << endl;
+}
+
+template<class K, class V> 
 void simplemap_t<K,V>::init(K key) {
     int counter = 0;
     int balance = 0;

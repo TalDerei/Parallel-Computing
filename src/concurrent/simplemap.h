@@ -27,6 +27,7 @@
 #include <functional>
 #include <mutex>
 #include <thread>
+#include "config_t.h"
 
 #define BALANCE 100000.0
 #define AMOUNT 10.0
@@ -90,6 +91,9 @@ class simplemap_t {
 
     // Record exeuction time for unordered map
     void init(K);
+
+    void threading(config_t &, simplemap_t<int, float> &);
+
 };
 
 #endif
