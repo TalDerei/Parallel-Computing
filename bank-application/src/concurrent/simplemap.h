@@ -39,13 +39,13 @@ class simplemap_t {
   std::unordered_map<K,V> map;
 
   // Lockable unordered_map of key/value pairs
-  struct bucket_t;
+  struct bucket;
 
   // Number of buckets, each bucket representing an account
   size_t const num_buckets = NUMBUCKETS;
 
   // Vector of buckets
-  std::vector<bucket_t *>buckets;
+  std::vector<bucket *>buckets;
 
   // Vector of threads
   std::vector<std::thread> thread_vec;
@@ -66,13 +66,6 @@ class simplemap_t {
     // Returns true on success, false if the key was not already present.
     void remove(K);
 
-    // If key is present in the map, return a pair consisting of
-    // the corresponding value and true. Otherwise, return a pair with the
-    // boolean entry set to false.
-    // Be careful not to share the memory of the map with application threads, you might
-    // get unexpected race conditions
-    std::pair<V, bool> lookup(K);
-
     // If key is present in the data structure, replace its value with val
     // and return true; if key is not present in the data structure, return
     // false.
@@ -80,6 +73,13 @@ class simplemap_t {
 
     void update_add(K, V, K);
 
+    // If key is present in the map, return a pair consisting of
+    // the corresponding value and true. Otherwise, return a pair with the
+    // boolean entry set to false.
+    // Be careful not to share the memory of the map with application threads, you might
+    // get unexpected race conditions
+    std::pair<V, bool> lookup(K);
+    
     // Apply a balance function to each key in the map
     void apply_balance(std::function<void(K,V)>);
 

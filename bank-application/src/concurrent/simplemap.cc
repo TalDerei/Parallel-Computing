@@ -17,7 +17,7 @@
 using namespace std;
 
 template<class K, class V> 
-struct simplemap_t<K, V>::bucket_t {
+struct simplemap_t<K, V>::bucket {
     std::mutex lock;
     std::unordered_map<K,V> map;
 };
@@ -25,7 +25,7 @@ struct simplemap_t<K, V>::bucket_t {
 template<class K, class V> 
 void simplemap_t<K, V>::concurrent_hashtable(size_t _buckets) {
     for (int i = 0; i < _buckets; i++) {
-        buckets.push_back(new bucket_t());
+        buckets.push_back(new bucket());
     }
 }
 
@@ -67,6 +67,20 @@ void simplemap_t<K,V>::init(K key) {
 }
 
 template<class K, class V> 
+void simplemap_t<K, V>::update_subtract(K key, V val, K bucket_index) {
+    std::lock_guard<std::mutex> (buckets[bucket_index]->lock);
+        auto update = buckets[bucket_index]->map.find(key);
+        update->second -= val;
+}
+
+template<class K, class V> 
+void simplemap_t<K, V>::update_add(K key, V val, K bucket_index) {
+    std::lock_guard<std::mutex> (buckets[bucket_index]->lock);
+        auto update = buckets[bucket_index]->map.find(key);
+        update->second += val;
+}
+
+template<class K, class V> 
 void simplemap_t<K, V>::insert(K key, V val) {
     size_t bucket_index = std::hash<K>{}(key) % num_buckets;
     std::lock_guard<std::mutex> (buckets[bucket_index]->lock);
@@ -90,20 +104,6 @@ std::pair<V, bool> simplemap_t<K, V>::lookup(K key) {
         return std::make_pair(0, false);
     }
     return std::make_pair(key, true);
-}
-
-template<class K, class V> 
-void simplemap_t<K, V>::update_subtract(K key, V val, K bucket_index) {
-    std::lock_guard<std::mutex> (buckets[bucket_index]->lock);
-        auto update = buckets[bucket_index]->map.find(key);
-        update->second -= val;
-}
-
-template<class K, class V> 
-void simplemap_t<K, V>::update_add(K key, V val, K bucket_index) {
-    std::lock_guard<std::mutex> (buckets[bucket_index]->lock);
-        auto update = buckets[bucket_index]->map.find(key);
-        update->second += val;
 }
 
 template<class K, class V> 
