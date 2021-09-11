@@ -26,8 +26,8 @@ void do_work(simplemap_t<int, float> &simple_map) {
 
 	float acc_balances = balance(simple_map);
 	cout << "Balance of all accounts is: " << acc_balances << endl;
-	cout << "Deposit counter is: " << deposit_counter << endl;
-	cout << "Balance counter is: " << balance_counter << endl;
+	// cout << "Deposit counter is: " << deposit_counter << endl;
+	// cout << "Balance counter is: " << balance_counter << endl;
 }
 
 float balance(simplemap_t<int, float> &simple_map) {

@@ -93,7 +93,6 @@ class simplemap_t {
     void init(K);
 
     void threading(config_t &, simplemap_t<int, float> &);
-
 };
 
 #endif
