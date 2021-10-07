@@ -9,11 +9,10 @@ import sklearn
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn import metrics
-from sklearn.cluster import AgglomerativeClustering
 
 # Read input
 df = pd.read_csv(
-    'datasets/[DATASET.TXT]', sep=" ",header=None)
+    'datasets/dataset4_100k.txt', sep=" ",header=None)
 
 x = np.array(df[0])
 y = np.array(df[1])
