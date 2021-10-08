@@ -3,18 +3,17 @@
 
 #include <iostream>
 #include <vector>
-#include <set>
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
 #include <algorithm>
 #include <chrono>
 #include <thread>
-#include <mutex>
 #include <oneapi/tbb/parallel_for.h>
 #include <oneapi/tbb/parallel_reduce.h>
 #include <oneapi/tbb/task_arena.h>
 #include <oneapi/tbb/global_control.h>
+#include "/usr/local/opt/libomp/include/omp.h"
 
 #define THREADS 8
 
@@ -138,18 +137,18 @@ private:
 		double sum = 0.0, min_dist;
 		int id_cluster_center = 0;
 
-		#pragma omp simd
+		// #pragma omp simd
 		for(int i = 0; i < total_values; i++) {
 			sum += pow(clusters[0].getCentralValue(i) - point.getValue(i), 2.0);
 		}
 
 		min_dist = sqrt(sum);
 
+		// #pragma omp simd
 		for(int i = 1; i < K; i++) {
 			double dist;
 			sum = 0.0;
 
-			#pragma omp simd
 			for(int j = 0; j < total_values; j++) {
 				sum += pow(clusters[i].getCentralValue(j) - point.getValue(j), 2.0);
 			}
@@ -175,6 +174,7 @@ public:
 	}
 
 	void run(vector<Point> & points) {
+		/** Start timing execution */
         auto begin = chrono::high_resolution_clock::now();
         
 		if (K > total_points) {
@@ -204,6 +204,15 @@ public:
 		int iter = 1;
 
 		while(true) {
+			/** Number of dimensions/attributes associated with each point */
+			int dimensions = total_values;
+
+			/** Vector containing centroid counts */
+            std::vector<int> centroids_count(K);
+
+            /** N-dementional Matrix containing cluster sums */
+            std::vector<std::vector<float>> cluster_matrix(K, std::vector<float>(dimensions));
+
 			bool done = true;
 
 			/** Number of TBB threads */
@@ -228,24 +237,15 @@ public:
 
 			/** Recalulating the center of each cluster by rewriting the logic of evaluating points by clusters */
 
-			/** Number of dimensions/attributes associated with each point */
-			int dimensions = total_values;
-
-			/** Vector containing cluster counts */
-            std::vector<std::atomic<int>> cluster_count(K);
-
-            /** Matrix containing cluster sums */
-            std::vector<std::vector<double>> cluster_matrix(K, std::vector<double>(total_values));
-
             /** Compute cluster counts */
-			// parallel_for(tbb::blocked_range<size_t>(0, total_points), [&](tbb::blocked_range<size_t> r) {			
+			#pragma omp parallel
 			for (int i = 0; i < total_points; i++) { 
-				cluster_count[points[i].getCluster()]++;
+				centroids_count[points[i].getCluster()]++;
 			}
-			// }, auto_partitioner());
 			
             /** Summation of values in the cluster */
             for (int i = 0; i < total_points; i++) { 
+				#pragma omp parallel for reduction(+ : cluster_matrix[points[i].getCluster()][j])
                 for (int j = 0; j < dimensions; j++) {
                     cluster_matrix[points[i].getCluster()][j] += points[i].getValue(j);
                 }
@@ -254,39 +254,39 @@ public:
             /** Set cluster values by computing mean */
             for(int i = 0; i < K; i++) {
                 for (int j = 0; j < dimensions; j++) {
-					double mean = cluster_matrix[i][j] / cluster_count[i];
+					double mean = cluster_matrix[i][j] / centroids_count[i];
                     clusters[i].setCentralValue(j, mean);
                 }
             }
 
             /** Reset contents of matrix for reuse */
 			for(int i = 0 ; i < K; i++){
-				#pragma omp simd
             	for( int j = 0; j < dimensions; j++){
                 	cluster_matrix[i][j] = 0;
              	}
             }
 
 			if(done == true || iter >= max_iterations) {
-				// cout << "Break in iteration " << iter << "\n\n";
+				/** Finally add points to clusters ONLY ONCE */
+				cout << "Total points is: " << total_points << endl;
+				for (int i = 0; i < total_points; i++) {
+					int id = points[i].getCluster();
+					clusters[id].addPoint(points[i]);
+				}
 				break;
 			}
 
 			iter++;
 		}
 
-		/** Add points to clusters */
-        for (int i = 0; i < total_points; i++) {
-            int id = points[i].getCluster();
-            clusters[id].addPoint(points[i]);
-        }
-
+		/** Finish timing execution */
         auto end = chrono::high_resolution_clock::now();
 
 		/** shows elements of clusters */
 		for(int i = 0; i < K; i++) {
 			int total_points_cluster =  clusters[i].getTotalPoints();
-
+			cout << "Total points in cluster " << i << " is: " << total_points_cluster << endl;
+ 
 			cout << "Cluster " << clusters[i].getID() + 1 << endl;
 			for(int j = 0; j < total_points_cluster; j++) {
 				cout << "Point " << clusters[i].getPoint(j).getID() + 1 << ": ";
