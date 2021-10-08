@@ -12,7 +12,7 @@ from sklearn import metrics
 
 # Read input
 df = pd.read_csv(
-    'dataset3.txt', sep=" ",header=None)
+    'DATASET_FILE', sep=" ",header=None)
 
 x = np.array(df[0])
 y = np.array(df[1])
