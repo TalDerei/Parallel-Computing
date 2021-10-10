@@ -229,7 +229,6 @@ public:
 			/** Recalulating the center of each cluster by rewriting the logic of evaluating points by clusters */
 
             /** Compute cluster counts */
-			// #pragma omp parallel
 			for (int i = 0; i < total_points; i++) { 
 				centroids_count[points[i].getCluster()]++;
 			}
