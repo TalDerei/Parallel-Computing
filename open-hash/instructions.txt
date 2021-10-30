@@ -1,0 +1,71 @@
+CSE 375/475 Assignment #3 (20 points)
+Fall 2021
+
+Introduction:
+
+  The purpose of this assignment is to implement three versions of an
+  open-addressed hash set. To read more about open-addressed hash set design,
+  you can find an introduction to that in Chapter 13.4 of the textbook
+  "The Art of Multiprocessor Programming" and in many other books or online resources.
+  The requested set implementation has to provide the following APIs: 'add', 'remove', and 'contains'.
+  In addition to that, the set should provide a non-thread safe
+  function (named 'size') that counts the number of elements in the hash set, and a non-thread
+  safe function (named 'populate') that initializes the data structure with random
+  elements (feel free to change the size to test different configurations).
+  The set has to allow applications to add any generic data type to the data
+  structure. Implementations that account for only integers are accepted with
+  a penalty of 5 points.
+  
+  The following three versions of an open-addressed has set are required:
+  - a sequential version, as specified in Chapter 13.4.1 (or a better variant of it);
+  - a concurrent version with a fixed number of locks, as specified in Chapter 13.4.3;
+  - a transactional version, which converts the sequential version in concurrent by
+    exploiting the Transactional Memory abstraction as provided by GCC.
+    
+  In order to test the performance of the three versions, it is required
+  to develop a simple application that spawns a pre-defined number of threads that
+  operate on the implemented open-addressed hash set of integer elements. Each of these
+  threads executes a pre-defined number of operations on the data structure with the
+  following distribution: 80\% contains, 10% insert; 10% remove. For simplicity, elements
+  to be used by these data structure operations are random.
+  The outcome of each operation should be recorded and the expected size
+  of the data structure at the end of the application execution should be computed.
+  When all threads are joined, the function size should be invoked and it should match the
+  value of the expected size.
+
+  When you perform your test, do not forget to populate your data structure first and then
+  start benchmarking your application.
+
+  The goal of the homework is to contrast the performance of the three implementations.
+  It is required to produce at least three plots that show performance exploring different configurations.
+  You are allowed to also change the percentage of operations during the tests, if you wish;
+  but do not forget to evaluate the specified mix 80\% contains, 10% insert; 10% remove.
+  
+  The transactional version of the data structure uses very advanced synchronization
+  abstractions, which are not yet as robust as classical locking mechanisms, such as mutex.
+  Any effort made to accomplish the transactional version will be appreciated if documented.
+  My expectation is that the concurrent version will outperform sequential and
+  transactional. I will be happy to discuss any other finding if documented.
+  
+  It is a requirement to use the machines available at sunlab.cse.lehigh.edu. An evaluation
+  performed on your own laptop will not be considered enough, unless a specific
+  authorization has been granted by me.
+    
+  Note that:
+  - the developing language is C++;
+  - TM is implemented in GCC starting from version 4.7. Use the latest version of GCC
+    available in sunlab.
+  - All the findings (successful and unsuccessful) should be recorded in a document to be
+    submitted along with the implementations' source code.
+  
+  The deadline for submission is Friday November 12, 2021 at 11:55 PM. 
+  The submission should be done through coursesite.lehigh.edu and should consist of:
+  - the source code of your assignment;
+  - a document containing the performance plots and the findings you consider
+    worth to be shared with me.
+
+  I will grade assignments during a one-on-one meeting with you.
+
+  Good luck!
+
+Prof. Roberto Palmieri
