@@ -25,21 +25,25 @@ void run_tests(config_t &config, sequential<K> &hashtable) {
 	for (int i = 0; i < config.iterations; i++) {
         int key = rand() % config.key_max; 
 		int opt = rand() % 100;
-		if (opt < 80) {
+		if (opt < 10) {
+            cout << "LOOKUP OPERATION!" << endl;
 			hashtable.lookup(key);
             lookup_count ++;
 		} else if ((80 < opt) && (opt < 90)) {
+            cout << "INSERT OPERATION!" << endl;
             hashtable.insert(key);
             insert_count++;
         } else {
+            cout << "REMOVE OPERATION!" << endl;
 			hashtable.remove(key);
             remove_count++;
 		}
 	}
 
-    cout << "number of 'contains' operations: " << lookup_count << endl;
-    cout << "number of 'contains' operations: " << insert_count << endl;
-    cout << "number of 'contains' operations: " << remove_count << endl;
+    /** Count number of operations completed */
+    cout << "number of 'lookup' operations: " << lookup_count << endl;
+    cout << "number of 'insert' operations: " << insert_count << endl;
+    cout << "number of 'remove' operations: " << remove_count << endl;
 }
 
 #endif

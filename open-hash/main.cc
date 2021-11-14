@@ -55,6 +55,6 @@ int main(int argc, char **argv) {
     /** Insert/Remove/Lookup API function calls */
     run_tests(config, hashtable);
 
-    /** Print vector */
+    /** Print hashtable */
     hashtable.print();
 }
