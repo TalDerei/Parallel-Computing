@@ -12,7 +12,7 @@ using namespace std;
 
 template<typename K>
 void run_tests(config_t &config, sequential<K> &hashtable) {
-    /* Function counts */
+    /* API counters */
     int lookup_count = 0;
     int insert_count = 0;
     int remove_count = 0;
@@ -25,7 +25,7 @@ void run_tests(config_t &config, sequential<K> &hashtable) {
 	for (int i = 0; i < config.iterations; i++) {
         int key = rand() % config.key_max; 
 		int opt = rand() % 100;
-		if (opt < 10) {
+		if (opt < 80) {
             cout << "LOOKUP OPERATION!" << endl;
 			hashtable.lookup(key);
             lookup_count ++;
@@ -40,10 +40,13 @@ void run_tests(config_t &config, sequential<K> &hashtable) {
 		}
 	}
 
-    /** Count number of operations completed */
+    /** Print the number of operations completed */
+    cout << endl;
+    cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
     cout << "number of 'lookup' operations: " << lookup_count << endl;
     cout << "number of 'insert' operations: " << insert_count << endl;
     cout << "number of 'remove' operations: " << remove_count << endl;
+    cout << endl;
 }
 
 #endif

@@ -27,7 +27,7 @@ struct config_t {
     /** Display help message */
     bool usage = false;
 
-    /** Data type used in data structure */
+    /** Data type (int, float, string) used in data structure */
     std::string data_type = "";
 };
 

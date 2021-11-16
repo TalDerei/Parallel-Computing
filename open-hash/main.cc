@@ -15,7 +15,7 @@
 #include "tests.h"
 #include "config_t.h"
 
-/** Helper method displaying help message*/
+/** Helper method displaying help message */
 void usage() {
     std::cout
         << "Command-Line Options:" << std::endl
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     config_t config;
     parseargs(argc, argv, config);
 
-    /** Instantiate objects and call constructor */ 
+    /** Instantiate hashtable object and call constructor */ 
     sequential<int> hashtable;
 
     /** Insert/Remove/Lookup API function calls */
