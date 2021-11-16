@@ -1,30 +1,33 @@
 /**
- * @file sequential.h
+ * @file concurrent.h
  * 
- * Sequential Implementation of Cuckoo Hash 
+ * Concurrent Implementation of Cuckoo Hash 
  */
 
-#ifndef SEQUENTIAL_DEF
-#define SEQUENTIAL_DEF
+#ifndef CONCURRENT_DEF
+#define CONCURRENT_DEF
 
 #include <iostream>
 #include <vector>
 #include <functional>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <mutex>
+#include <thread>
 #include "config_t.h"
+#include <algorithm>
+#include <ctime>
 
 #define HASHTABLES 2
 #define EMPTY -1
 #define RECURSION 10
 #define RESIZE_PERCENTAGE 50
 
-inline int REHASH_COUNT = 0;
-
 using namespace std;
 
 template<typename K>
-class sequential {
+class concurrent {
     /** Bucket struct contianing key */
     struct bucket {
         K key;
@@ -35,10 +38,13 @@ class sequential {
 
 public: 
     /** Constructor initializing empty object */
-    sequential() {}
+    concurrent() {}
 
     /** Driver function for executing API calls */
-    void driver(config_t &, sequential<K> &);
+    void driver(config_t &, concurrent<K> &);
+
+    /** Spawn threads */
+    void spawn_threads(config_t &, concurrent<K> &);
 
     /** Initialize hashtable */
     void initialize(K);

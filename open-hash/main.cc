@@ -50,11 +50,24 @@ int main(int argc, char **argv) {
     parseargs(argc, argv, config);
 
     /** Instantiate hashtable object and call constructor */ 
-    sequential<int> hashtable;
+    // sequential<int> hashtable;
+    concurrent<int> hashtable;
 
-    /** Insert/Remove/Lookup API function calls */
-    run_tests(config, hashtable);
+    /* Start execution time */
+    auto start = chrono::high_resolution_clock::now();
+
+    /** Driver function for executing API calls */
+    hashtable.driver(config, hashtable);
+
+    /** Finish execution time */
+    auto finish = chrono::high_resolution_clock::now();
+
+    /** Duration represents time elapsed */
+    chrono::duration<double> elapse_time = finish - start;
 
     /** Print hashtable */
-    hashtable.print();
+    // hashtable.print();
+
+    /** Print execution time */
+    std::cout << "Execution time elapsed is: " << elapse_time.count() << endl;
 }

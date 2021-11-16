@@ -13,7 +13,7 @@
 TARGETS = main
 
 # names of other .cc files
-CXXFILES = # no common files :)
+CXXFILES = concurrent
 
 #
 # The rest of this file should never need to change

@@ -7,18 +7,15 @@
 
 #include "config_t.h"
 #include "sequential.h"
+#include "concurrent.h"
 
 using namespace std;
 
-template<typename K>
-void run_tests(config_t &config, sequential<K> &hashtable) {
+inline void run_tests(config_t &config, concurrent<int> &hashtable) {
     /* API counters */
     int lookup_count = 0;
     int insert_count = 0;
     int remove_count = 0;
-
-    /** Initialize data structure to half the size of the key_length */
-    hashtable.initialize(config.key_max);
 
     /** Randomly call insert/remove/lookup APIs */ 
     srand(time(0));
