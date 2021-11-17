@@ -11,8 +11,8 @@
 #include <chrono>
 #include <unordered_map>
 
-#include "sequential.h"
-#include "tests.h"
+// #include "sequential.h"
+#include "concurrent.h"
 #include "config_t.h"
 
 /** Helper method displaying help message */
@@ -23,7 +23,6 @@ void usage() {
         << "  -b <int>    : the upper maximum key value when choosing random keys" << std::endl
         << "  -c <int>    : the number of iterations per thread" << std::endl
         << "  -d <int>    : the number of threads in the experiment" << std::endl
-        << "  -e <int>    : data type used in the data structure (int, float)" << std::endl
         << "  -h          : display this message and exit" << std::endl << std::endl;
     exit(0);
 }
@@ -50,13 +49,15 @@ int main(int argc, char **argv) {
     parseargs(argc, argv, config);
 
     /** Instantiate hashtable object and call constructor */ 
-    // sequential<int> hashtable;
     concurrent<int> hashtable;
+
+    hashtable.initialize(config.key_max);
 
     /* Start execution time */
     auto start = chrono::high_resolution_clock::now();
 
     /** Driver function for executing API calls */
+
     hashtable.driver(config, hashtable);
 
     /** Finish execution time */

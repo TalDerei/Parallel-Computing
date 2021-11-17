@@ -15,14 +15,18 @@
 #include <string.h>
 #include <mutex>
 #include <thread>
-#include "config_t.h"
 #include <algorithm>
 #include <ctime>
+#include <memory>
+#include <atomic>
+#include "config_t.h"
 
-#define HASHTABLES 2
-#define EMPTY -1
-#define RECURSION 10
-#define RESIZE_PERCENTAGE 50
+inline int REHASH_COUNT_CONCURRENT = 0;
+
+#define HASHTABLES              2
+#define EMPTY                   -1
+#define RECURSION               10
+#define RESIZE_PERCENTAGE       50
 
 using namespace std;
 
@@ -30,11 +34,14 @@ template<typename K>
 class concurrent {
     /** Bucket struct contianing key */
     struct bucket {
-        K key;
+        std::atomic<K> key;
     };
 
+    std::mutex mtx;
+    std::mutex m1;
+
     /** 2D Vector with pointers to buckets as underlying data structure for hash table */
-    std::vector<std::vector<bucket *> > hashtable_t;
+    std::vector<std::vector<shared_ptr<bucket>>> hashtable_t;
 
 public: 
     /** Constructor initializing empty object */
@@ -63,6 +70,9 @@ public:
 
     /** Rehash and Resize hashtable */
     void rehash();
+
+    /** Execute API calls */
+    void run_tests(config_t &, concurrent<int> &);
 
     /** Hash function that switches between murmur_hash and bitwise_hash */
     int hash(int, K);

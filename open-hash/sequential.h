@@ -14,12 +14,12 @@
 #include <string.h>
 #include "config_t.h"
 
-#define HASHTABLES 2
-#define EMPTY -1
-#define RECURSION 10
-#define RESIZE_PERCENTAGE 50
+#define HASHTABLES              2
+#define EMPTY                   -1
+#define RECURSION               10
+#define RESIZE_PERCENTAGE       50
 
-inline int REHASH_COUNT = 0;
+inline int REHASH_COUNT_SEQUENTIAL = 0;
 
 using namespace std;
 
