@@ -11,8 +11,7 @@ using namespace std;
 
 template<typename K>
 void sequential<K>::driver(config_t &config, sequential<K> &hashtable) {
-    /** Initialize data structure to half the size of the key_length */
-    // initialize(config.key_max);
+    cout << "STARTING SEQUENTIAL!" << endl;
 
     /** Execute API functions */
     run_tests(config, hashtable);
@@ -93,7 +92,7 @@ template<typename K>
 bool sequential<K>::swap(int table, K key, int recursion) {  
     /** If loop is detected, rehash hashtables */ 
     if (recursion == RECURSION) {
-        // cout << "Loop detected. Triggering RESIZE AND REHASH!";
+        cout << "Loop detected. Triggering RESIZE AND REHASH!";
         rehash();
         REHASH_COUNT_SEQUENTIAL++;
         return true;
@@ -119,7 +118,7 @@ bool sequential<K>::swap(int table, K key, int recursion) {
 /** Rehash and Resize hashtable */
 template<typename K>
 void sequential<K>::rehash() {
-    // cout << "STARTING RESIZE AND REHASH!" << endl;
+    cout << "STARTING RESIZE AND REHASH!" << endl;
 
     /** Define temporary vector to hold elements */
     std::vector<std::vector<K> > temp_hashtable_one;
@@ -180,9 +179,9 @@ void sequential<K>::rehash() {
 
 void run_tests(config_t &config, sequential<int> &hashtable) {
     /* API counters */
-    int lookup_count = 0;
-    int insert_count = 0;
-    int remove_count = 0;
+    int lookup_true = 0, lookup_false = 0;
+    int insert_true = 0, insert_false = 0;
+    int remove_true = 0, remove_false = 0;
 
     /** Randomly call insert/remove/lookup APIs */ 
     srand(time(0));
@@ -191,27 +190,45 @@ void run_tests(config_t &config, sequential<int> &hashtable) {
 		int opt = rand() % 100;
 		if (opt < 80) {
             // cout << "LOOKUP OPERATION!" << endl;
-			hashtable.lookup(key);
-            lookup_count ++;
+			if (hashtable.lookup(key).second) {
+                lookup_true++;
+            }
+            else {
+                lookup_false++;
+            }
 		} 
         else if ((80 < opt) && (opt < 90)) {
             // cout << "INSERT OPERATION!" << endl;
-            hashtable.insert(key);
-            insert_count++;
+            if (hashtable.insert(key)) {
+                insert_true++;
+            }
+            else {
+                insert_false++;
+            }            
         } 
         else {
             // cout << "REMOVE OPERATION!" << endl;
-			hashtable.remove(key);
-            remove_count++;
+			if (hashtable.remove(key)) {
+                remove_true++;
+            }
+            else {
+                remove_false++;
+            }
 		}
 	}
 
     /** Print the number of operations completed */
     cout << endl;
     cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
-    cout << "number of 'lookup' operations: " << lookup_count << endl;
-    cout << "number of 'insert' operations: " << insert_count << endl;
-    cout << "number of 'remove' operations: " << remove_count << endl;
+    cout << "number of 'lookup' operations: " << lookup_true + lookup_false << endl;
+    cout << "number of lookups succeeded: " << lookup_true << endl;
+    cout << "number of lookups failed: " << lookup_false << endl;
+    cout << "number of 'insert' operations: " << insert_true + insert_false << endl;
+    cout << "number of inserts succeeded: " << insert_true << endl;
+    cout << "number of inserts failed: " << insert_false << endl;
+    cout << "number of 'remove' operations: " << remove_true + insert_false << endl;
+    cout << "number of remove succeeded: " << remove_true << endl;
+    cout << "number of remove failed: " << remove_false << endl;
     cout << endl;
 }
 
@@ -239,7 +256,7 @@ int sequential<K>::bitwise_hash(K key) {
 
 /** Hash function using murmur hash library */
 template<typename K>
-int sequential<K>::murmur_hash(K key) {
+inline int sequential<K>::murmur_hash(K key) {
     uint64_t seed = 100;
     uint64_t hash_otpt[2]= {0};
     const int *key_hash = &key;

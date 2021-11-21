@@ -20,11 +20,12 @@
 #include <memory>
 #include <atomic>
 #include "config_t.h"
+#include <shared_mutex>
 
 inline int REHASH_COUNT_CONCURRENT = 0;
 
-#define HASHTABLES              2
 #define EMPTY                   -1
+#define HASHTABLES              2
 #define RECURSION               10
 #define RESIZE_PERCENTAGE       50
 
@@ -32,16 +33,17 @@ using namespace std;
 
 template<typename K>
 class concurrent {
-    /** Bucket struct contianing key */
+    /** Bucket struct contianing key and lock */
     struct bucket {
         std::atomic<K> key;
+        std::mutex locks;
     };
-
-    std::mutex mtx;
-    std::mutex m1;
-
+  
     /** 2D Vector with pointers to buckets as underlying data structure for hash table */
     std::vector<std::vector<shared_ptr<bucket>>> hashtable_t;
+
+    /** Mutex lock for rehash call */
+    std::mutex m;
 
 public: 
     /** Constructor initializing empty object */
@@ -59,6 +61,9 @@ public:
     /** Insert API function call */
     bool insert(K);
 
+    /** New insertion function */
+    bool insert_new(K);
+
     /** Remove API function call */
     bool remove(K);
 
@@ -69,7 +74,7 @@ public:
     bool swap(int, K, int);
 
     /** Rehash and Resize hashtable */
-    void rehash();
+    bool rehash();
 
     /** Execute API calls */
     void run_tests(config_t &, concurrent<int> &);
