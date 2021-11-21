@@ -111,7 +111,7 @@ bool concurrent<K>::remove(K key) {
 template<typename K>
 bool concurrent<K>::swap(int table, K key, int recursion) {  
     /** Thread ID executing the API call */
-    cout << "Thread executing insert() operation is: " << std::this_thread::get_id() << endl;
+    // cout << "Thread executing insert() operation is: " << std::this_thread::get_id() << endl;
     
     /** If loop is detected, rehash hashtables */ 
     if (recursion == RECURSION) {
@@ -132,7 +132,7 @@ bool concurrent<K>::swap(int table, K key, int recursion) {
 
     /* If hashtable index already contains an element, swap the element */
     if (hashtable_t[table][index]->key.load(std::memory_order_seq_cst) != EMPTY) {
-        cout << "Index " << index << " in hashtable " << table << " is already populated! Swapping it!" << endl;
+        // cout << "Index " << index << " in hashtable " << table << " is already populated! Swapping it!" << endl;
 
         K val = std::atomic_load(&hashtable_t[table][index]->key);
         hashtable_t[table][index]->key.store(key, std::memory_order_seq_cst);
@@ -155,8 +155,6 @@ bool concurrent<K>::swap(int table, K key, int recursion) {
 /** Rehash and Resize hashtable */
 template<typename K>
 bool concurrent<K>::rehash() {
-    cout << "STARTING RESIZE AND REHASH!" << endl;
-
     /** lock all the buckets */
     for (int i = 0; i < (int) hashtable_t.size(); i++) {
         for (int j = 0; j < (int) hashtable_t[i].size(); j++) {
@@ -184,10 +182,16 @@ bool concurrent<K>::rehash() {
     int hashtable_one = hashtable_t[0].size();
     int hashtable_two = hashtable_t[1].size();
 
-
     /** Resize old hashtable size */
     int hashtable_one_new = hashtable_t[0].size() * (1+((float)RESIZE_PERCENTAGE)/100);
     int hashtable_two_new = hashtable_t[1].size() * (1+((float)RESIZE_PERCENTAGE)/100);
+
+    for (int j = 0; j < hashtable_one; j++) {
+        hashtable_t[0][j]->key.store(-1, std::memory_order_seq_cst);
+    }
+    for (int j = 0; j < hashtable_two; j++) {
+        hashtable_t[1][j]->key.store(-1, std::memory_order_seq_cst);
+    }
 
     /** Alloctate new space in resized hashtables */
     for (int j = hashtable_one; j < hashtable_one_new; j++) {
@@ -201,18 +205,14 @@ bool concurrent<K>::rehash() {
     }
 
     /** Copy values back to old hash table */
-    for (int k = 0; k < (int) hashtable_t[0].size(); k++) {
+    for (int k = 0; k < hashtable_one; k++) {
         hashtable_t[0][hash(0, temp_hashtable_one[0][k])]->key.store(temp_hashtable_one[0][k], std::memory_order_seq_cst);
-        // temp_hashtable_one[0][k]
     }
-    for (int k = 0; k < (int) hashtable_t[1].size(); k++) {
-        hashtable_t[1][hash(1, temp_hashtable_two[0][k])]->key.store(temp_hashtable_one[0][k], std::memory_order_seq_cst);
+    for (int k = 0; k < hashtable_two; k++) {
+        hashtable_t[1][hash(1, temp_hashtable_two[0][k])]->key.store(temp_hashtable_two[0][k], std::memory_order_seq_cst);
     }
 
-    /** Print size of resized hashtables */
-    cout << "'Size of Hashtable One is:> " << hashtable_t[0].size() << endl;
-    cout << "'Size of Hashtable Two is:> " << hashtable_t[1].size() << endl;
-
+    /** Unlock buckets */
     for (int i = 0; i < (int) hashtable_t.size(); i++) {
         for (int j = 0; j < (int) hashtable_t[i].size(); j++) {
             hashtable_t[i][j]->locks.unlock();
@@ -235,17 +235,14 @@ void concurrent<K>::run_tests(config_t &config, concurrent<int> &hashtable) {
         int key = rand() % config.key_max; 
 		int opt = rand() % 100;
 		if (opt < 2) {
-            // cout << "LOOKUP OPERATION!" << endl;
 			hashtable.lookup(key);
             lookup_count ++;
 		} 
         else if ((2 < opt) && (opt < 99)) {
-            cout << "INSERT OPERATION!" << endl;
             hashtable.insert(key);
             insert_count++;
         } 
         else {
-            // cout << "REMOVE OPERATION!" << endl;
 			hashtable.remove(key);
             remove_count++;
 		}
@@ -270,22 +267,9 @@ int concurrent<K>::hash(int table, K key) {
     return 0;
 }
 
-/** Hash function adopted from CSE 109 */
-template<typename K>
-int concurrent<K>::bitwise_hash(K key) {
-    uint32_t hash = 5381;
-    unsigned char* rbytes = (unsigned char*)(&key); 
-    for (size_t i = 0; i < 3; ++i) { 
-        hash = ((hash << 5) + hash) ^ (rbytes[i]); 
-    }
-    int index = hash % hashtable_t[1].size();
-    return index;
-}
-
 /** Hash function using murmur hash library */
 template<typename K>
 inline int concurrent<K>::murmur_hash(K key) {
-    // cout << "ENTERED MURMUR_HASH!!!!!!" << endl;
     uint64_t seed = 100;
     uint64_t hash_otpt[2]= {0};
     const int *key_hash = &key;
@@ -294,10 +278,18 @@ inline int concurrent<K>::murmur_hash(K key) {
     return index;
 }
 
+/** Hash function from xxHash libraru */
+template<typename K>
+int concurrent<K>::bitwise_hash(K key) {
+    uint hash = (uint) xxh::xxhash<32>({key });
+    int index = hash % hashtable_t[1].size();
+    return index;
+}
+
 /** Print hashtable */
 template<typename K>
 void concurrent<K>::print() {
-    // cout << "First and Second Hashtables: " << endl;
+    cout << "First and Second Hashtables: " << endl;
     for (int i = 0; i < (int) hashtable_t.size(); i++) {
         for (int j = 0; j < (int) hashtable_t[i].size(); j++) {
             cout << hashtable_t[i][j]->key.load(std::memory_order_seq_cst) << " ";

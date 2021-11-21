@@ -19,8 +19,8 @@
 #include <ctime>
 #include <memory>
 #include <atomic>
-#include "config_t.h"
 #include <shared_mutex>
+#include "config_t.h"
 
 inline int REHASH_COUNT_CONCURRENT = 0;
 

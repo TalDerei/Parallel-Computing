@@ -67,6 +67,7 @@ int main(int argc, char **argv) {
     //     conc_hashtable.driver(config, conc_hashtable);
     // }
     conc_hashtable.driver(config, conc_hashtable);
+    // seq_hashtable.driver(config, seq_hashtable);
 
     /** Finish execution time */
     auto finish = chrono::high_resolution_clock::now();
@@ -81,7 +82,9 @@ int main(int argc, char **argv) {
     // else if (config.method == "concurrent") {
     //     conc_hashtable.print();
     // }
+
     conc_hashtable.print();
+    // seq_hashtable.print();
 
     /** Print execution time */
     std::cout << "Execution time elapsed is: " << elapse_time.count() << endl;
