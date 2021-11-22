@@ -1,5 +1,7 @@
-// Implementation of the KMeans Algorithm
-// reference: http://mnemstudio.org/clustering-k-means-example-1.htm
+/**
+ * @file kmeans-parallel.cpp
+ * @author Tal Derei (tad222@lehigh.edu)
+ */
 
 #include <iostream>
 #include <vector>
@@ -9,11 +11,11 @@
 #include <algorithm>
 #include <chrono>
 #include <thread>
-#include <oneapi/tbb/parallel_for.h>
-#include <oneapi/tbb/parallel_reduce.h>
-#include <oneapi/tbb/task_arena.h>
-#include <oneapi/tbb/global_control.h>
-#include "/usr/local/opt/libomp/include/omp.h"
+#include <tbb/parallel_for.h>
+#include <tbb/parallel_reduce.h>
+#include <tbb/task_arena.h>
+#include <tbb/global_control.h>
+#include <omp.h>
 
 #define THREADS 8
 
@@ -93,18 +95,6 @@ public:
 		points.push_back(point);
 	}
 
-	bool removePoint(int id_point) {
-		int total_points = points.size();
-
-		for(int i = 0; i < total_points; i++) {
-			if(points[i].getID() == id_point) {
-				points.erase(points.begin() + i);
-				return true;
-			}
-		}
-		return false;
-	}
-
 	double getCentralValue(int index) {
 		return central_values[index];
 	}
@@ -137,14 +127,14 @@ private:
 		double sum = 0.0, min_dist;
 		int id_cluster_center = 0;
 
-		// #pragma omp simd
+		#pragma omp simd
 		for(int i = 0; i < total_values; i++) {
 			sum += pow(clusters[0].getCentralValue(i) - point.getValue(i), 2.0);
 		}
 
 		min_dist = sqrt(sum);
 
-		// #pragma omp simd
+		#pragma omp simd
 		for(int i = 1; i < K; i++) {
 			double dist;
 			sum = 0.0;
@@ -207,13 +197,14 @@ public:
 			/** Number of dimensions/attributes associated with each point */
 			int dimensions = total_values;
 
+			/** N-dementional Matrix containing cluster sums */
+			std::vector<float> attributes(dimensions, 0.0f);
+            std::vector<std::vector<float>> cluster_matrix(K, attributes);
+
 			/** Vector containing centroid counts */
-            std::vector<int> centroids_count(K);
+            std::vector<size_t> centroids_count(K);
 
-            /** N-dementional Matrix containing cluster sums */
-            std::vector<std::vector<float>> cluster_matrix(K, std::vector<float>(dimensions));
-
-			bool done = true;
+			bool terminate = true;
 
 			/** Number of TBB threads */
 			tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, THREADS);
@@ -227,10 +218,10 @@ public:
 					if(id_old_cluster != id_nearest_center) {
 						/** 
 						 * Deleted removePoint() and addPoint() function calls that were throwing race conditions.
-						 * Simply associating points with clusters, WITHOUT adding them to the cluster.
+						 * Simply associating points with clusters, WITHOUT adding them to the clusters.
 						 */
 						points[i].setCluster(id_nearest_center);
-						done = false;
+						terminate = false;
 					}
 				}
 			}, auto_partitioner());
@@ -238,7 +229,6 @@ public:
 			/** Recalulating the center of each cluster by rewriting the logic of evaluating points by clusters */
 
             /** Compute cluster counts */
-			#pragma omp parallel
 			for (int i = 0; i < total_points; i++) { 
 				centroids_count[points[i].getCluster()]++;
 			}
@@ -247,11 +237,11 @@ public:
             for (int i = 0; i < total_points; i++) { 
 				#pragma omp parallel for reduction(+ : cluster_matrix[points[i].getCluster()][j])
                 for (int j = 0; j < dimensions; j++) {
-                    cluster_matrix[points[i].getCluster()][j] += points[i].getValue(j);
+                    cluster_matrix[points[i].getCluster()][j] = cluster_matrix[points[i].getCluster()][j] + points[i].getValue(j);
                 }
             }
 
-            /** Set cluster values by computing mean */
+            /** Calculate centroid values */
             for(int i = 0; i < K; i++) {
                 for (int j = 0; j < dimensions; j++) {
 					double mean = cluster_matrix[i][j] / centroids_count[i];
@@ -266,12 +256,14 @@ public:
              	}
             }
 
-			if(done == true || iter >= max_iterations) {
+			if(terminate == true || iter >= max_iterations) {
+				int counter = 0;
 				/** Finally add points to clusters ONLY ONCE */
 				cout << "Total points is: " << total_points << endl;
 				for (int i = 0; i < total_points; i++) {
 					int id = points[i].getCluster();
 					clusters[id].addPoint(points[i]);
+					counter++;
 				}
 				break;
 			}
@@ -313,6 +305,8 @@ public:
             cout << "TIME PHASE 1 = "<<std::chrono::duration_cast<std::chrono::microseconds>(end_phase1-begin).count()<<"\n";
             
             cout << "TIME PHASE 2 = "<<std::chrono::duration_cast<std::chrono::microseconds>(end-end_phase1).count()<<"\n";
+
+			cout << "iters is: " << iter << endl;
 		}
 	}
 };

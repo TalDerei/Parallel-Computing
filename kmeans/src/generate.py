@@ -9,11 +9,11 @@ Original file is located at
 
 import numpy as np
 
-num_points_approx = 10000
-diveregnce_approx = 20
+num_points_approx = 2000
+diveregnce_approx = 100
 datatype = 1 # 1 for integer, 2 for real
-dimension_approx = 10
-K_approx = 15
+dimension_approx = 150
+K_approx = 25
 iteration_approx = 1000
 rng = np.random.default_rng()
 num_datasets = 5

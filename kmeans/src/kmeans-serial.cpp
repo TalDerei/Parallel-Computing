@@ -1,3 +1,8 @@
+/**
+ * @file kmeans-serial.cpp
+ * @author Tal Dereu (tad222@lehigh.edu)
+ */
+
 // Implementation of the KMeans Algorithm
 // reference: http://mnemstudio.org/clustering-k-means-example-1.htm
 
