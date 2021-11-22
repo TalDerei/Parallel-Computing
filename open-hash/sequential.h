@@ -15,7 +15,7 @@
 #include "config_t.h"
 
 #define HASHTABLES              2
-#define EMPTY                   -1
+#define EMPTY                   0
 #define RECURSION               10
 #define RESIZE_PERCENTAGE       50
 
@@ -27,6 +27,7 @@ template<typename K>
 class sequential {
     /** Bucket struct contianing key */
     struct bucket {
+        bool empty;
         K key;
     };
 
@@ -40,8 +41,8 @@ public:
     /** Driver function for executing API calls */
     void driver(config_t &, sequential<K> &);
 
-    /** Initialize hashtable */
-    void initialize(K);
+    /** Initialize and populate hashtable */
+    void populate(K);
 
     /** Insert API function call */
     bool insert(K);

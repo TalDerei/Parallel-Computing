@@ -19,12 +19,11 @@
 #include <ctime>
 #include <memory>
 #include <atomic>
-#include <shared_mutex>
 #include "config_t.h"
 
 inline int REHASH_COUNT_CONCURRENT = 0;
 
-#define EMPTY                   -1
+#define EMPTY                   0
 #define HASHTABLES              2
 #define RECURSION               10
 #define RESIZE_PERCENTAGE       50
@@ -56,7 +55,7 @@ public:
     void spawn_threads(config_t &, concurrent<K> &);
 
     /** Initialize hashtable */
-    void initialize(K);
+    void populate(K);
 
     /** Insert API function call */
     bool insert(K);

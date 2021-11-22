@@ -6,28 +6,41 @@
 
 #include "sequential.h"
 #include "murmurHash.h"
+#include "hash.h"
 
 using namespace std;
 
 template<typename K>
 void sequential<K>::driver(config_t &config, sequential<K> &hashtable) {
-    cout << "STARTING SEQUENTIAL!" << endl;
-
     /** Execute API functions */
     run_tests(config, hashtable);
 }
 
-/** Initialize hashtable */
+/** Populate and initialize hashtable */
 template<typename K>
-void sequential<K>::initialize(K key_max) {
+void sequential<K>::populate(K key_max) {
     /** Resize hashtable_t to include 2 hashtables */
     hashtable_t.resize(HASHTABLES);
 
-    /** Populate each row with a 'key_max' number of pointers to buckets */
+    /** Initialize each table with a 'key_max' number of pointers to buckets */
+    for (int i = 0; i < HASHTABLES; i++) {
+        for (int j = 0; j < key_max; j++) {
+            hashtable_t[i].push_back(new bucket());
+        }
+    }
+
+    /** Populate hashtables with random values */
+    srand(time(0));
     for (int i = 0; i < HASHTABLES; i++) {
         for (int j = 0; j < key_max / 2; j++) {
-            hashtable_t[i].push_back(new bucket());
-            hashtable_t[i][j]->key = -1;
+            bool loop = true; 
+            while (loop) {
+                int key = rand() % key_max; 
+                if (!(lookup(key).second)) {
+                    hashtable_t[i][j]->key = key;
+                    loop = false;
+                }
+            }
         }
     }
 }
@@ -125,12 +138,8 @@ void sequential<K>::rehash() {
     std::vector<std::vector<K> > temp_hashtable_two;    
 
     /** Create temporary hashtables with new size */
-    temp_hashtable_one.resize(1, vector<K>(hashtable_t[0].size() * (1+((float)RESIZE_PERCENTAGE)/100), -1));
-    temp_hashtable_two.resize(1, vector<K>(hashtable_t[1].size() * (1+((float)RESIZE_PERCENTAGE)/100), -1));
-
-    /** Print size of temporary hashtables */
-    // cout << "size of temp_hashtable_one[0].size() " << temp_hashtable_one[0].size() << endl;
-    // cout << "size of temp_hashtable_two[0].size() " << temp_hashtable_two[0].size() << endl;     
+    temp_hashtable_one.resize(1, vector<K>(hashtable_t[0].size() * (1+((float)RESIZE_PERCENTAGE)/100), 0));
+    temp_hashtable_two.resize(1, vector<K>(hashtable_t[1].size() * (1+((float)RESIZE_PERCENTAGE)/100), 0));   
 
     /** Copy old hashtable to temporary hashtable */
     for (int i = 0; i < (int) hashtable_t[0].size(); i++) {
@@ -144,10 +153,6 @@ void sequential<K>::rehash() {
     hashtable_t[0].resize(hashtable_t[0].size() * (1+((float)RESIZE_PERCENTAGE)/100));
     hashtable_t[1].resize(hashtable_t[1].size() * (1+((float)RESIZE_PERCENTAGE)/100));
 
-    /** Print new size of old hashtables */
-    // cout << "Size of table[0] after resize is: " << hashtable_t[0].size() << endl;
-    // cout << "Size of table[1] after resize is: " << hashtable_t[1].size() << endl;
-
     /** Save new hashtable sizes */
     int hashtable_one = hashtable_t[0].size();
     int hashtable_two = hashtable_t[1].size();
@@ -159,11 +164,11 @@ void sequential<K>::rehash() {
     /** Alloctate new space in resized hashtables */
     for (int i = 0; i < (int) hashtable_one; i++) {
         hashtable_t[0].push_back(new bucket());
-        hashtable_t[0][i]->key = -1;
+        hashtable_t[0][i]->key = 0;
     }
     for (int i = 0; i < (int) hashtable_two; i++) {
         hashtable_t[1].push_back(new bucket());
-        hashtable_t[1][i]->key = -1;
+        hashtable_t[1][i]->key = 0;
     }
 
     /** Copy values back to old hash table */
@@ -173,63 +178,6 @@ void sequential<K>::rehash() {
     for (int k = 0; k < (int) hashtable_t[1].size(); k++) {
         hashtable_t[1][hash(1, temp_hashtable_two[0][k])]->key = temp_hashtable_two[0][k];
     }
-
-    // cout << "SUCCESSFULLY EXECUTED RESIZE AND REHASH!" << endl;
-}
-
-void run_tests(config_t &config, sequential<int> &hashtable) {
-    /* API counters */
-    int lookup_true = 0, lookup_false = 0;
-    int insert_true = 0, insert_false = 0;
-    int remove_true = 0, remove_false = 0;
-
-    /** Randomly call insert/remove/lookup APIs */ 
-    srand(time(0));
-	for (int i = 0; i < config.iterations / config.threads; i++) {
-        int key = rand() % config.key_max; 
-		int opt = rand() % 100;
-		if (opt < 80) {
-            // cout << "LOOKUP OPERATION!" << endl;
-			if (hashtable.lookup(key).second) {
-                lookup_true++;
-            }
-            else {
-                lookup_false++;
-            }
-		} 
-        else if ((80 < opt) && (opt < 90)) {
-            // cout << "INSERT OPERATION!" << endl;
-            if (hashtable.insert(key)) {
-                insert_true++;
-            }
-            else {
-                insert_false++;
-            }            
-        } 
-        else {
-            // cout << "REMOVE OPERATION!" << endl;
-			if (hashtable.remove(key)) {
-                remove_true++;
-            }
-            else {
-                remove_false++;
-            }
-		}
-	}
-
-    /** Print the number of operations completed */
-    cout << endl;
-    cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
-    cout << "number of 'lookup' operations: " << lookup_true + lookup_false << endl;
-    cout << "number of lookups succeeded: " << lookup_true << endl;
-    cout << "number of lookups failed: " << lookup_false << endl;
-    cout << "number of 'insert' operations: " << insert_true + insert_false << endl;
-    cout << "number of inserts succeeded: " << insert_true << endl;
-    cout << "number of inserts failed: " << insert_false << endl;
-    cout << "number of 'remove' operations: " << remove_true + insert_false << endl;
-    cout << "number of remove succeeded: " << remove_true << endl;
-    cout << "number of remove failed: " << remove_false << endl;
-    cout << endl;
 }
 
 /** Hash function that switches between murmur_hash and bitwise_hash */
@@ -242,14 +190,10 @@ int sequential<K>::hash(int table, K key) {
     return 0;
 }
 
-/** Hash function adopted from CSE 109 */
+/** Hash function from xxHash libraru */
 template<typename K>
 int sequential<K>::bitwise_hash(K key) {
-    uint32_t hash = 5381;
-    unsigned char* rbytes = (unsigned char*)(&key); 
-    for (size_t i = 0; i < 3; ++i) { 
-        hash = ((hash << 5) + hash) ^ (rbytes[i]); 
-    }
+    uint hash = (uint) xxh::xxhash<32>({key});
     int index = hash % hashtable_t[1].size();
     return index;
 }
@@ -261,15 +205,66 @@ inline int sequential<K>::murmur_hash(K key) {
     uint64_t hash_otpt[2]= {0};
     const int *key_hash = &key;
     MurmurHash3_x64_128(key_hash, sizeof(K), seed, hash_otpt); 
-    // cout << *hash_otpt << endl;
     int index = *hash_otpt % hashtable_t[0].size();
     return index;
+}
+
+/** Randomly call insert/remove/lookup APIs */ 
+void run_tests(config_t &config, sequential<int> &hashtable) {
+    /* API counters */
+    int lookup_true = 0, lookup_false = 0;
+    int insert_true = 0, insert_false = 0;
+    int remove_true = 0, remove_false = 0;
+
+    srand(time(0));
+	for (int i = 0; i < config.iterations / config.threads; i++) {
+        int key = rand() % config.key_max; 
+		int opt = rand() % 100;
+		if (opt < 80) {
+			if (hashtable.lookup(key).second) {
+                lookup_true++;
+            }
+            else {
+                lookup_false++;
+            }
+		} 
+        else if ((80 < opt) && (opt < 90)) {
+            if (hashtable.insert(key)) {
+                insert_true++;
+            }
+            else {
+                insert_false++;
+            }            
+        } 
+        else {
+			if (hashtable.remove(key)) {
+                remove_true++;
+            }
+            else {
+                remove_false++;
+            }
+		}
+	}
+
+    /** Print the number of operations completed */
+    cout << endl;
+    cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
+    cout << "Number of 'lookup' operations: " << lookup_true + lookup_false << endl;
+    cout << "Number of lookups succeeded: " << lookup_true << endl;
+    cout << "Number of lookups failed: " << lookup_false << endl;
+    cout << "Number of 'insert' operations: " << insert_true + insert_false << endl;
+    cout << "Number of inserts succeeded: " << insert_true << endl;
+    cout << "Number of inserts failed: " << insert_false << endl;
+    cout << "Number of 'remove' operations: " << remove_true + insert_false << endl;
+    cout << "Number of remove succeeded: " << remove_true << endl;
+    cout << "Number of remove failed: " << remove_false << endl;
+    cout << endl;
 }
 
 /** Print hashtable */
 template<typename K>
 void sequential<K>::print() {
-    // cout << "First and Second Hashtables: " << endl;
+    cout << "First and Second Hashtables: " << endl;
     for (int i = 0; i < (int) hashtable_t.size(); i++) {
         for (int j = 0; j < (int) hashtable_t[i].size(); j++) {
             cout << hashtable_t[i][j]->key << " ";

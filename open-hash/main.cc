@@ -9,9 +9,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <chrono>
-#include <unordered_map>
 
-// #include "sequential.h"
+#include "sequential.h"
 #include "concurrent.h"
 #include "config_t.h"
 
@@ -49,25 +48,27 @@ int main(int argc, char **argv) {
     parseargs(argc, argv, config);
 
     /** Instantiate hashtable objects and call constructor */ 
-    // sequential<int> seq_hashtable;
+    sequential<int> seq_hashtable;
     concurrent<int> conc_hashtable;
 
     /** Initialize data structure to half the size of the key_length */
-    // seq_hashtable.initialize(config.key_max);
-    conc_hashtable.initialize(config.key_max);
+    if (config.method == "sequential") {
+        seq_hashtable.populate(config.key_max);
+    } 
+    else if (config.method == "concurrent") {
+        conc_hashtable.populate(config.key_max);
+    }
 
     /* Start execution time */
     auto start = chrono::high_resolution_clock::now();
 
     /** Driver function for executing API calls */
-    // if (config.method == "sequential") {
-    //     seq_hashtable.driver(config, seq_hashtable);
-    // } 
-    // else if (config.method == "concurrent") {
-    //     conc_hashtable.driver(config, conc_hashtable);
-    // }
-    conc_hashtable.driver(config, conc_hashtable);
-    // seq_hashtable.driver(config, seq_hashtable);
+    if (config.method == "sequential") {
+        seq_hashtable.driver(config, seq_hashtable);
+    } 
+    else if (config.method == "concurrent") {
+        conc_hashtable.driver(config, conc_hashtable);
+    }
 
     /** Finish execution time */
     auto finish = chrono::high_resolution_clock::now();
@@ -76,15 +77,12 @@ int main(int argc, char **argv) {
     chrono::duration<double> elapse_time = finish - start;
 
     /** Print hashtable */
-    // if (config.method == "sequential") {
-    //     seq_hashtable.print();
-    // } 
-    // else if (config.method == "concurrent") {
-    //     conc_hashtable.print();
-    // }
-
-    conc_hashtable.print();
-    // seq_hashtable.print();
+    if (config.method == "sequential") {
+        seq_hashtable.print();
+    } 
+    else if (config.method == "concurrent") {
+        conc_hashtable.print();
+    }
 
     /** Print execution time */
     std::cout << "Execution time elapsed is: " << elapse_time.count() << endl;

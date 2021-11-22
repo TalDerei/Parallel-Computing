@@ -13,7 +13,7 @@
 TARGETS = main
 
 # names of other .cc files
-CXXFILES = concurrent
+CXXFILES = sequential concurrent
 
 #
 # The rest of this file should never need to change
@@ -44,8 +44,8 @@ DFILES     = $(patsubst %.o, %.d, $(ALLOFILES))
 # optimizations, and generate dependency information on-the-fly
 CXX      = g++
 LD       = g++
-CXXFLAGS = -MMD -O3 -m$(BITS) -ggdb -std=c++17 -Wall -Werror
-LDFLAGS  = -m$(BITS) -lpthread -lcrypto
+CXXFLAGS = -MMD -O3 -m$(BITS) -ggdb -std=c++17 -Wall -Werror 
+LDFLAGS  = -m$(BITS) -lpthread -lcrypto -pthread -fgnu-tm
 
 # Build 'all' by default, and don't clobber .o files after each build
 .DEFAULT_GOAL = all

@@ -17,7 +17,7 @@ void concurrent<K>::driver(config_t &config, concurrent<K> &hashtable) {
 }
 
 template<typename K>
-void concurrent<K>::initialize(K key_max) {
+void concurrent<K>::populate(K key_max) {
     /** Resize hashtable_t to include 2 hashtables */
     hashtable_t.resize(HASHTABLES);
 
@@ -28,7 +28,7 @@ void concurrent<K>::initialize(K key_max) {
             hashtable_t[i].push_back(std::make_shared<bucket>());
 
             /** Set the value atomically */
-            hashtable_t[i][j]->key.store(-1, std::memory_order_seq_cst);
+            hashtable_t[i][j]->key.store(0, std::memory_order_seq_cst);
         }
     }
 }
@@ -97,11 +97,11 @@ bool concurrent<K>::remove(K key) {
 
     /** If key found in either table, remove key and return true */
     if (table == 0) {
-        hashtable_t[table][hash(table, key)]->key.store(-1, std::memory_order_seq_cst);
+        hashtable_t[table][hash(table, key)]->key.store(0, std::memory_order_seq_cst);
         // cout << "Removed " << key << " successfully from " << "table " << table << endl;
     }
     else if (table == 1) {
-        hashtable_t[table][hash(table, key)]->key.store(-1, std::memory_order_seq_cst);
+        hashtable_t[table][hash(table, key)]->key.store(0, std::memory_order_seq_cst);
         // cout << "Removed " << key << " successfully from " << "table " << table << endl;
     }
     return true;
@@ -186,22 +186,23 @@ bool concurrent<K>::rehash() {
     int hashtable_one_new = hashtable_t[0].size() * (1+((float)RESIZE_PERCENTAGE)/100);
     int hashtable_two_new = hashtable_t[1].size() * (1+((float)RESIZE_PERCENTAGE)/100);
 
+    /** Set old hashtable values to 0, declaring them empty */
     for (int j = 0; j < hashtable_one; j++) {
-        hashtable_t[0][j]->key.store(-1, std::memory_order_seq_cst);
+        hashtable_t[0][j]->key.store(0, std::memory_order_seq_cst);
     }
     for (int j = 0; j < hashtable_two; j++) {
-        hashtable_t[1][j]->key.store(-1, std::memory_order_seq_cst);
+        hashtable_t[1][j]->key.store(0, std::memory_order_seq_cst);
     }
 
     /** Alloctate new space in resized hashtables */
     for (int j = hashtable_one; j < hashtable_one_new; j++) {
         hashtable_t[0].push_back(std::make_shared<bucket>());
-        hashtable_t[0][j]->key.store(-1, std::memory_order_seq_cst);
+        hashtable_t[0][j]->key.store(0, std::memory_order_seq_cst);
     }
 
     for (int j = hashtable_two; j < hashtable_two_new; j++) {
         hashtable_t[1].push_back(std::make_shared<bucket>());
-        hashtable_t[1][j]->key.store(-1, std::memory_order_seq_cst);
+        hashtable_t[1][j]->key.store(0, std::memory_order_seq_cst);
     }
 
     /** Copy values back to old hash table */
@@ -220,41 +221,6 @@ bool concurrent<K>::rehash() {
     }
 
     return true;
-}
-
-template<typename K>
-void concurrent<K>::run_tests(config_t &config, concurrent<int> &hashtable) {
-    /* API counters */
-    int lookup_count = 0;
-    int insert_count = 0;
-    int remove_count = 0;
-
-    /** Randomly call insert/remove/lookup APIs */ 
-    srand(time(0));
-	for (int i = 0; i < config.iterations / config.threads; i++) {
-        int key = rand() % config.key_max; 
-		int opt = rand() % 100;
-		if (opt < 2) {
-			hashtable.lookup(key);
-            lookup_count ++;
-		} 
-        else if ((2 < opt) && (opt < 99)) {
-            hashtable.insert(key);
-            insert_count++;
-        } 
-        else {
-			hashtable.remove(key);
-            remove_count++;
-		}
-	}
-
-    /** Print the number of operations completed */
-    cout << endl;
-    cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
-    cout << "number of 'lookup' operations: " << lookup_count << endl;
-    cout << "number of 'insert' operations: " << insert_count << endl;
-    cout << "number of 'remove' operations: " << remove_count << endl;
-    cout << endl;
 }
 
 /** Hash function that switches between murmur_hash and bitwise_hash */
@@ -281,9 +247,65 @@ inline int concurrent<K>::murmur_hash(K key) {
 /** Hash function from xxHash libraru */
 template<typename K>
 int concurrent<K>::bitwise_hash(K key) {
-    uint hash = (uint) xxh::xxhash<32>({key });
+    uint hash = (uint) xxh::xxhash<32>({key});
     int index = hash % hashtable_t[1].size();
     return index;
+}
+
+template<typename K>
+void concurrent<K>::run_tests(config_t &config, concurrent<int> &hashtable) {
+    /* API counters */
+    int lookup_true = 0, lookup_false = 0;
+    int insert_true = 0, insert_false = 0;
+    int remove_true = 0, remove_false = 0;
+
+    /** Randomly call insert/remove/lookup APIs */ 
+    srand(time(0));
+	for (int i = 0; i < config.iterations / config.threads; i++) {
+        int key = rand() % config.key_max; 
+		int opt = rand() % 100;
+		if (opt < 80) {
+            // cout << "LOOKUP OPERATION!" << endl;
+			if (hashtable.lookup(key).second) {
+                lookup_true++;
+            }
+            else {
+                lookup_false++;
+            }
+		} 
+        else if ((80 < opt) && (opt < 90)) {
+            // cout << "INSERT OPERATION!" << endl;
+            if (hashtable.insert(key)) {
+                insert_true++;
+            }
+            else {
+                insert_false++;
+            }            
+        } 
+        else {
+            // cout << "REMOVE OPERATION!" << endl;
+			if (hashtable.remove(key)) {
+                remove_true++;
+            }
+            else {
+                remove_false++;
+            }
+		}
+	}
+
+    /** Print the number of operations completed */
+    cout << endl;
+    cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
+    cout << "number of 'lookup' operations: " << lookup_true + lookup_false << endl;
+    cout << "number of lookups succeeded: " << lookup_true << endl;
+    cout << "number of lookups failed: " << lookup_false << endl;
+    cout << "number of 'insert' operations: " << insert_true + insert_false << endl;
+    cout << "number of inserts succeeded: " << insert_true << endl;
+    cout << "number of inserts failed: " << insert_false << endl;
+    cout << "number of 'remove' operations: " << remove_true + insert_false << endl;
+    cout << "number of remove succeeded: " << remove_true << endl;
+    cout << "number of remove failed: " << remove_false << endl;
+    cout << endl;
 }
 
 /** Print hashtable */
