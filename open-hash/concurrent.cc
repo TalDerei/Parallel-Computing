@@ -23,7 +23,7 @@ void concurrent<K>::populate(K key_max) {
 
     /** Populate each row with a 'key_max' number of pointers to buckets */
     for (int i = 0; i < HASHTABLES; i++) {
-        for (int j = 0; j < key_max; j++) {
+        for (int j = 0; j < key_max / 2; j++) {
             /** Use push_back to construct the object with make_shared */
             hashtable_t[i].push_back(std::make_shared<bucket>());
 
