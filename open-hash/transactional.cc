@@ -52,19 +52,17 @@ void driver(config_t &config, transactional<K> &hashtable) {
 }
 
 void populate(K key_max) {
-    __transaction_atomic {} {
-        /** Resize hashtable_t to include 2 hashtables */
-        hashtable_t.resize(HASHTABLES);
+    /** Resize hashtable_t to include 2 hashtables */
+    hashtable_t.resize(HASHTABLES);
 
-        /** Populate each row with a 'key_max' number of pointers to buckets */
-        for (int i = 0; i < HASHTABLES; i++) {
-            for (int j = 0; j < key_max / 2; j++) {
-                /** Use push_back to construct the object with make_shared */
-                hashtable_t[i].push_back(std::make_shared<bucket>());
+    /** Populate each row with a 'key_max' number of pointers to buckets */
+    for (int i = 0; i < HASHTABLES; i++) {
+        for (int j = 0; j < key_max; j++) {
+            /** Use push_back to construct the object with make_shared */
+            hashtable_t[i].push_back(std::make_shared<bucket>());
 
-                /** Set the value atomically */
-                hashtable_t[i][j]->key.store(-1, std::memory_order_seq_cst);
-            }
+            /** Set the value atomically */
+            hashtable_t[i][j]->key.store(-1, std::memory_order_seq_cst);
         }
     }
 }
@@ -157,7 +155,7 @@ bool swap(int table, K key, int recursion) {
     /** Calculate index and lock the entry in the table */
     int index = hash(table, key);
 
-    __transaction_atomic {} {
+    synchronized {
         /* If hashtable index already contains an element, swap the element */
         if (hashtable_t[table][index]->key.load(std::memory_order_seq_cst) != EMPTY) {
             // cout << "Index " << index << " in hashtable " << table << " is already populated! Swapping it!" << endl;
@@ -175,15 +173,13 @@ bool swap(int table, K key, int recursion) {
             return true;
         }
     }
-    
     return true;
 }
 
 /** Rehash and Resize hashtable */
-// static __attribute__((transaction_pure))
 bool rehash() {
     /** lock all the buckets in a transaction using STM */
-    __transaction_atomic {} {
+    synchronized {
         /** Define temporary vector to hold elements */
         std::vector<std::vector<K> > temp_hashtable_one;
         std::vector<std::vector<K> > temp_hashtable_two;    

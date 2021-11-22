@@ -131,8 +131,6 @@ bool sequential<K>::swap(int table, K key, int recursion) {
 /** Rehash and Resize hashtable */
 template<typename K>
 void sequential<K>::rehash() {
-    cout << "STARTING RESIZE AND REHASH!" << endl;
-
     /** Define temporary vector to hold elements */
     std::vector<std::vector<K> > temp_hashtable_one;
     std::vector<std::vector<K> > temp_hashtable_two;    
